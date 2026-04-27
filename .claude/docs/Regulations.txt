@@ -1,0 +1,92 @@
+[
+    {
+        "id": 745,
+        "title": "Hog Industry Loan Loss Reserve Program (HILLRP)",
+        "country": "Canada",
+        "impact": "Increases access to credit for hog producers, facilitating business viability and loan repayment.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Active",
+        "year": 2025
+    },
+    {
+        "id": 1181,
+        "title": "Risk analysis programme (SILA - RIAL - PNI - OBSERVATORIO)",
+        "country": "Chile",
+        "impact": "Public finance allocations for risk analysis in food safety.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Proposed",
+        "year": 2025
+    },
+    {
+        "id": 3235,
+        "title": "Market Price Differential for Peppers",
+        "country": "Israel",
+        "impact": "Market price differential set to zero for peppers, which are exported and not subject to export subsidies or market price policies.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Implemented",
+        "year": 2024
+    },
+    {
+        "id": 3226,
+        "title": "Export Subsidy Commitment under URAA",
+        "country": "Israel",
+        "impact": "Affects the price gap between export price and reference price until 2015 due to remaining export subsidies.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Implemented",
+        "year": 2024
+    },
+    {
+        "id": 3230,
+        "title": "Trade Status Policy",
+        "country": "Israel",
+        "impact": "Israel has been a net exporter of peanuts since 1995.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Active",
+        "year": 2024
+    },
+    {
+        "id": 3234,
+        "title": "Direct Procurement Centres for Fruits and Vegetables",
+        "country": "Israel",
+        "impact": "Elimination of marketing margins, allowing supermarkets to buy directly from farms and imports, thus overtaking wholesalers.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Implemented",
+        "year": 2024
+    },
+    {
+        "id": 3224,
+        "title": "Market Price Differential at the Farm Gate",
+        "country": "Israel",
+        "impact": "Reflects the price gap using the import value as reference for wheat, a largely imported commodity.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Implemented",
+        "year": 2024
+    },
+    {
+        "id": 3229,
+        "title": "Producer Prices at the Farm Gate",
+        "country": "Israel",
+        "impact": "Average farm gate prices calculated to reflect the value of production.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Active",
+        "year": 2024
+    },
+    {
+        "id": 3225,
+        "title": "Reference Prices at the Farm Gate",
+        "country": "Israel",
+        "impact": "Sets the reference price based on C.i.f. import unit values and defines the marketing margin at 1.9%.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Implemented",
+        "year": 2024
+    },
+    {
+        "id": 3236,
+        "title": "Reference Prices at the Farm Gate",
+        "country": "Israel",
+        "impact": "Reference prices based on f.o.b. export unit values, with marketing margins reflecting the spread between wholesale market value and border value.",
+        "source": "https://www.oecd.org/en/topics/agricultural-policy-monitoring.html",
+        "status": "Implemented",
+        "year": 2024
+    }
+]

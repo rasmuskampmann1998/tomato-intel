@@ -1,0 +1,310 @@
+{
+  "categories": {
+    "news": {
+      "sources": [
+        {
+          "name": "Hortidaily",
+          "url": "https://www.hortidaily.com",
+          "rss_url": "https://www.hortidaily.com/rss/",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "MDPI Horticulturae",
+          "url": "https://www.mdpi.com/journal/horticulturae",
+          "rss_url": "https://www.mdpi.com/rss/journal/horticulturae",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Oxford Academic — Horticulture Research",
+          "url": "https://academic.oup.com/hr",
+          "rss_url": "https://academic.oup.com/rss/site_5295/advanceAccess_5295.xml",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "The Conversation — Agriculture",
+          "url": "https://theconversation.com",
+          "rss_url": "https://theconversation.com/articles.atom?language=en",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "AP News Agriculture",
+          "url": "https://apnews.com/hub/agriculture",
+          "rss_url": "https://rsshub.app/apnews/topics/agriculture",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Seed World",
+          "url": "https://seedworld.com",
+          "rss_url": "https://seedworld.com/feed/",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Horticulture Advances",
+          "url": "https://academic.oup.com/horticultureadvances",
+          "rss_url": "https://academic.oup.com/rss/site_6714/advanceAccess_6714.xml",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "HortiAdvisor",
+          "url": "https://www.hortiadvisor.com",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".news-item h3 a",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "GFActueel.nl",
+          "url": "https://www.gfactueel.nl",
+          "rss_url": "https://www.gfactueel.nl/rss",
+          "scrape_type": "rss",
+          "language": "nl",
+          "is_required": true
+        },
+        {
+          "name": "Greentech.nl",
+          "url": "https://www.greentech.nl",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".article-teaser h3 a",
+          "language": "nl",
+          "is_required": true
+        },
+        {
+          "name": "GartnerTidende",
+          "url": "https://www.gartnertidende.dk",
+          "rss_url": "https://www.gartnertidende.dk/feed",
+          "scrape_type": "rss",
+          "language": "da",
+          "is_required": false
+        },
+        {
+          "name": "Veggies from Mexico",
+          "url": "https://www.veggiesfrommexico.com",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h2 a",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "AHS Gardening",
+          "url": "https://ahsgardening.org",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".post-title a",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "Revista Chapingo Horticultura",
+          "url": "https://revistas.chapingo.mx/horticultura/",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".article-title a",
+          "language": "es",
+          "is_required": false
+        },
+        {
+          "name": "HortiWeek UK",
+          "url": "https://www.hortweek.com",
+          "rss_url": "https://www.hortweek.com/rss/",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "Krishijagran (Indian Agriculture)",
+          "url": "https://krishijagran.com",
+          "rss_url": "https://krishijagran.com/feed/",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": false
+        }
+      ]
+    },
+    "patents": {
+      "sources": [
+        {
+          "name": "EPO — European Patent Office",
+          "url": "https://ops.epo.org",
+          "rss_url": null,
+          "scrape_type": "api_epo",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "USPTO — PatentsView API",
+          "url": "https://search.patentsview.org",
+          "rss_url": null,
+          "scrape_type": "api_uspto",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "CNIPA — China Patent Office",
+          "url": "https://pss-system.cponline.cnipa.gov.cn",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/web-scraper",
+          "language": "zh",
+          "is_required": true
+        },
+        {
+          "name": "IP India",
+          "url": "https://iprsearch.ipindia.gov.in",
+          "rss_url": null,
+          "scrape_type": "html",
+          "language": "en",
+          "is_required": true
+        }
+      ]
+    },
+    "social": {
+      "sources": [
+        {
+          "name": "Reddit",
+          "url": "https://www.reddit.com",
+          "rss_url": null,
+          "scrape_type": "praw",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Twitter / X",
+          "url": "https://twitter.com",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "CJdippxWmn9uRfooo",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Instagram",
+          "url": "https://www.instagram.com",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/instagram-scraper",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "LinkedIn",
+          "url": "https://www.linkedin.com",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/linkedin-post-search-scraper",
+          "language": "en",
+          "is_required": true
+        }
+      ]
+    },
+    "competitors": {
+      "sources": [
+        {
+          "name": "Rijk Zwaan",
+          "url": "https://www.rijkzwaan.com/press-releases",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h3 a",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Enza Zaden",
+          "url": "https://www.enzazaden.com/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".news-item h3 a",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Syngenta Vegetables",
+          "url": "https://www.syngenta.com/en/news-and-media",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/web-scraper",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Bejo Seeds",
+          "url": "https://www.bejo.com/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".news-card h3 a",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "De Ruiter Seeds",
+          "url": "https://www.deruiterseeds.com/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h3 a",
+          "language": "en",
+          "is_required": false
+        }
+      ]
+    },
+    "genetics": {
+      "sources": [
+        {
+          "name": "GRIN Global (USDA)",
+          "url": "https://npgsweb.ars-grin.gov/gringlobal/search",
+          "rss_url": null,
+          "scrape_type": "html",
+          "language": "en",
+          "is_required": true
+        }
+      ]
+    },
+    "regulations": {
+      "sources": [
+        {
+          "name": "EU Plant Health Portal",
+          "url": "https://food.ec.europa.eu/plants/plant-health-and-biosecurity_en",
+          "rss_url": null,
+          "scrape_type": "html",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "USDA APHIS",
+          "url": "https://www.aphis.usda.gov/aphis/newsroom/news",
+          "rss_url": "https://www.aphis.usda.gov/aphis/newsroom/rss/ct_rss_news",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        }
+      ]
+    },
+    "crops": {
+      "sources": [
+        {
+          "name": "MDPI Agronomy",
+          "url": "https://www.mdpi.com/journal/agronomy",
+          "rss_url": "https://www.mdpi.com/rss/journal/agronomy",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": false
+        }
+      ]
+    }
+  }
+}

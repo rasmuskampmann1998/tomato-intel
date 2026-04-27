@@ -1,0 +1,106 @@
+{
+    "id": "7bf412f1-7d34-423c-bce0-f3f23f8a0b10",
+    "date": "2025-06-26",
+    "news_data": [
+        {
+            "region": "Asia",
+            "source": "https://www.hortidaily.com/article/9719924/kazakhstan-to-build-100m-greenhouse-and-tomato-processing-complex/",
+            "country": "Kazakhstan",
+            "category": "trade",
+            "language": "English",
+            "timestamp": "2025-06-25",
+            "summary_en": "Kazakhstan is set to begin construction on a large-scale agro-industrial project focused on tomato processing for export markets, featuring a state-of-the-art tomato paste factory.",
+            "original_title": "Kazakhstan to Launch $100M Tomato Processing and Greenhouse Complex",
+            "title_translated": "Kazakhstan to Launch $100M Tomato Processing and Greenhouse Complex"
+        },
+        {
+            "region": "North America",
+            "source": "https://www.tomatonews.com/en/heinz-answers-demand-with-new-zero-ketchup_2_2688.html",
+            "country": "USA",
+            "category": "product",
+            "language": "English",
+            "timestamp": "2025-06-25",
+            "summary_en": "Heinz has launched a new addition to its ketchup range, responding to increasing consumer demand for healthier options with its 'Zero' ketchup made with tomatoes.",
+            "original_title": "Heinz Answers Demand with New 'Zero' Ketchup",
+            "title_translated": "Heinz Answers Demand with New 'Zero' Ketchup"
+        },
+        {
+            "region": "Europe",
+            "source": "https://www.tomatonews.com/en/price-of-canned-tomatoes-june-2025_2_2680.html",
+            "country": "Italy",
+            "category": "pricing",
+            "language": "English",
+            "timestamp": "2025-06-20",
+            "summary_en": "The latest update on canned tomatoes prices and exports from Italy, Spain, USA, Greece, and Portugal shows significant market dynamics as of June 20, 2025.",
+            "original_title": "Price of Canned Tomatoes, June 2025",
+            "title_translated": "Price of Canned Tomatoes, June 2025"
+        },
+        {
+            "region": "Asia",
+            "source": "https://www.tomatonews.com/en/research-new-crispr-method-boosts-tomato-traits_2_2685.html",
+            "country": "Israel",
+            "category": "technology",
+            "language": "English",
+            "timestamp": "2025-06-25",
+            "summary_en": "A collaborative research effort has developed a new CRISPR method that enhances desirable traits in tomato crops, potentially improving yield and resilience.",
+            "original_title": "Research: New CRISPR Method Boosts Tomato Traits",
+            "title_translated": "Research: New CRISPR Method Boosts Tomato Traits"
+        },
+        {
+            "region": "Europe",
+            "source": "https://www.tomatonews.com/en/research-life-cycle-assessment-of-tomato-products-packaging_2_2671.html",
+            "country": "Italy",
+            "category": "sustainability",
+            "language": "English",
+            "timestamp": "2025-06-25",
+            "summary_en": "A study published in Sustainability evaluates the environmental impact of packaging for tomato products, highlighting the importance of sustainable practices in the industry.",
+            "original_title": "Research: Life Cycle Assessment of Tomato Products Packaging",
+            "title_translated": "Research: Life Cycle Assessment of Tomato Products Packaging"
+        },
+        {
+            "region": "Europe",
+            "source": "https://www.tomatonews.com/pages/include/article_resultat.php",
+            "country": "Greece",
+            "category": "trade",
+            "language": "English",
+            "timestamp": "2025-06-25",
+            "summary_en": "The Greek trade balance for tomato products has shown remarkable performance, confirming a strong consolidation in exports since the last review.",
+            "original_title": "Greece: Spectacular Consolidation of Exports",
+            "title_translated": "Greece: Spectacular Consolidation of Exports"
+        },
+        {
+            "region": "Global",
+            "source": "https://www.tomatonews.com/en/wptc-2025-global-forecast-drops-below-40-million-tonnes_2_2664.html",
+            "country": "Global",
+            "category": "pricing",
+            "language": "English",
+            "timestamp": "2025-06-02",
+            "summary_en": "The WPTC has reduced its world production estimate for tomatoes in 2025 to 39.6 million tonnes, a significant drop from the previous year due to adverse weather conditions.",
+            "original_title": "WPTC 2025 global forecast drops below 40 million tonnes",
+            "title_translated": "WPTC 2025 global forecast drops below 40 million tonnes"
+        },
+        {
+            "region": "Africa",
+            "source": "https://www.tomatonews.com/en/zimbabwe-revitalizes-tomato-processing-infrastructure_2_2674.html",
+            "country": "Zimbabwe",
+            "category": "infrastructure",
+            "language": "English",
+            "timestamp": "2025-06-02",
+            "summary_en": "Italian engineers are rehabilitating multi-million dollar tomato processing equipment in Zimbabwe to boost local production.",
+            "original_title": "Zimbabwe Revitalizes Tomato Processing Infrastructure",
+            "title_translated": "Zimbabwe Revitalizes Tomato Processing Infrastructure"
+        },
+        {
+            "region": "North America",
+            "source": "https://www.tomatonews.com/en/farmers-tech-boosts-tomato-water-efficiency_2_2668.html",
+            "country": "USA",
+            "category": "technology",
+            "language": "English",
+            "timestamp": "2025-06-02",
+            "summary_en": "A Yolo County farmer has implemented new technology to enhance water efficiency in tomato cultivation, showcasing innovative farming practices.",
+            "original_title": "Farmer's Tech Boosts Tomato Water Efficiency",
+            "title_translated": "Farmer's Tech Boosts Tomato Water Efficiency"
+        }
+    ],
+    "created_at": "2025-06-26T08:55:11.523766"
+}

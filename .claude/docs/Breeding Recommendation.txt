@@ -1,0 +1,352 @@
+{
+   "id":"f8c65054-9fec-4bf8-8bd8-82e0fb1f71bf",
+   "date":"2025-06-18",
+   "breeding_recommendation":[
+      {
+         "crop":"Roma VF",
+         "season":"Summer",
+         "suitable_soil":"Loamy soil with good drainage, rich in organic matter; pH 6.0-6.8, with balanced NPK levels.",
+         "fertilizer_plan":"Apply balanced NPK fertilizer at planting, followed by side dressing with nitrogen during growth.",
+         "additional_notes":"Focus on integrated pest management to reduce chemical use and enhance sustainability.",
+         "equipment_needed":[
+            "Tractor",
+            "Rototiller",
+            "Drip irrigation system",
+            "Seed planter",
+            "Harvesting tools"
+         ],
+         "ideal_temperature":"20-25°C",
+         "planting_technique":"Plant seeds 1 inch deep in rows spaced 3 feet apart, with 18-24 inches between plants.",
+         "harvesting_guidance":"Harvest when fruit is firm and fully colored; handle gently to avoid bruising.",
+         "irrigation_guidance":"Drip irrigation preferred; maintain consistent moisture without waterlogging.",
+         "top_growing_location":"Mediterranean regions, North America",
+         "pest_disease_management":"Rotate crops, monitor for aphids and blight, and use resistant varieties.",
+         "variety_characteristics":{
+            "origin":"Italy",
+            "key_traits":[
+               "High yield",
+               "Disease resistant",
+               "Ideal for processing",
+               "Firm texture"
+            ],
+            "market_position":"Widely popular for canning and sauce production",
+            "scientific_name":"Solanum lycopersicum"
+         },
+         "expected_roi_usd_per_acre":"5000 USD",
+         "expected_yield_kg_per_acre":"20,000 kg",
+         "recommended_seed_varieties":[
+            "Roma VF Hybrid",
+            "Super Roma",
+            "San Marzano",
+            "Roma II",
+            "Roma L",
+            "Improved Roma"
+         ],
+         "regulatory_compliance_notes":"Follow local agricultural regulations regarding pesticide use and food safety standards.",
+         "recommended_selling_channels":[
+            "Local farmers' markets",
+            "Wholesale distributors",
+            "Food processing companies",
+            "Export markets"
+         ],
+         "market_price_range_usd_per_kg":"1.00 - 1.50 USD",
+         "budget_recommendation_estimated":{
+            "breakdown":{
+               "labor":"1500 USD",
+               "seeds":"300 USD",
+               "equipment":"600 USD",
+               "irrigation":"200 USD",
+               "pesticides":"100 USD",
+               "fertilizers":"150 USD"
+            },
+            "total_budget_estimated":"2850 USD"
+         },
+         "recommended_breeding_strategies":[
+            "Incorporate genetic resistance to bacterial wilt",
+            "Utilize marker-assisted selection for improved yield",
+            "Cross with high-lycopene varieties for enhanced health benefits",
+            "Implement tissue culture techniques for disease-free propagation",
+            "Explore CRISPR technology for trait enhancement",
+            "Focus on drought resistance through phenotypic selection"
+         ],
+         "sowing_to_harvest_duration_days":"75-85 days"
+      },
+      {
+         "crop":"Beefsteak",
+         "season":"Summer",
+         "suitable_soil":"Well-drained sandy loam with high organic matter content; pH 6.0-7.0.",
+         "fertilizer_plan":"Apply a high-phosphorus fertilizer at planting and top-dress with nitrogen as needed.",
+         "additional_notes":"Enhance customer appeal by emphasizing taste and quality in marketing.",
+         "equipment_needed":[
+            "Hand tools for pruning",
+            "Irrigation setup",
+            "Fertilizer spreader",
+            "Harvesting baskets",
+            "Trellis systems"
+         ],
+         "ideal_temperature":"22-30°C",
+         "planting_technique":"Transplant seedlings after frost; space plants 24-36 inches apart with staking.",
+         "harvesting_guidance":"Pick when fully ripe and slightly soft to the touch; avoid overripe fruit.",
+         "irrigation_guidance":"Regular watering, ensuring deep watering during dry spells.",
+         "top_growing_location":"Temperate regions, North America",
+         "pest_disease_management":"Implement crop rotation and monitor for early blight and whiteflies.",
+         "variety_characteristics":{
+            "origin":"North America",
+            "key_traits":[
+               "Large size",
+               "Juicy flesh",
+               "Sweet flavor",
+               "Excellent for fresh consumption"
+            ],
+            "market_position":"Popular fresh market variety, especially in gourmet markets",
+            "scientific_name":"Solanum lycopersicum"
+         },
+         "expected_roi_usd_per_acre":"4500 USD",
+         "expected_yield_kg_per_acre":"15,000 kg",
+         "recommended_seed_varieties":[
+            "Big Beef",
+            "Brandywine",
+            "Cherokee Purple",
+            "Beefmaster",
+            "Super Beefsteak",
+            "Pink Brandywine"
+         ],
+         "regulatory_compliance_notes":"Maintain food safety standards and organic certification if applicable.",
+         "recommended_selling_channels":[
+            "Local grocery stores",
+            "Farmers’ markets",
+            "Online sales",
+            "Restaurants"
+         ],
+         "market_price_range_usd_per_kg":"1.50 - 2.00 USD",
+         "budget_recommendation_estimated":{
+            "breakdown":{
+               "labor":"1600 USD",
+               "seeds":"350 USD",
+               "equipment":"650 USD",
+               "irrigation":"250 USD",
+               "pesticides":"120 USD",
+               "fertilizers":"180 USD"
+            },
+            "total_budget_estimated":"3150 USD"
+         },
+         "recommended_breeding_strategies":[
+            "Select for increased fruit size while maintaining shape",
+            "Enhance flavor profiles through sensory evaluation",
+            "Focus on resistance to common pests like spider mites and aphids",
+            "Utilize grafting techniques for improved root systems",
+            "Incorporate traits for heat tolerance",
+            "Develop hybrids for better shelf life"
+         ],
+         "sowing_to_harvest_duration_days":"80-90 days"
+      },
+      {
+         "crop":"Cherry Tomato",
+         "season":"Summer to early fall",
+         "suitable_soil":"Light, well-drained soil with plenty of organic matter; pH 6.0-7.0.",
+         "fertilizer_plan":"Use a balanced fertilizer at planting and side-dress with potassium during fruit set.",
+         "additional_notes":"Highlight the health benefits of cherry tomatoes in marketing.",
+         "equipment_needed":[
+            "Hand trowel",
+            "Garden sprayer",
+            "Seedling trays",
+            "Trellis or cages",
+            "Watering system"
+         ],
+         "ideal_temperature":"20-28°C",
+         "planting_technique":"Sow seeds indoors; transplant when seedlings are 6 inches tall; space 12-18 inches apart.",
+         "harvesting_guidance":"Harvest when fruit is fully colored and firm; use scissors to avoid plant damage.",
+         "irrigation_guidance":"Keep soil consistently moist without overwatering.",
+         "top_growing_location":"North America, Europe",
+         "pest_disease_management":"Monitor for fungal infections and aphids; use organic pest control methods.",
+         "variety_characteristics":{
+            "origin":"South America",
+            "key_traits":[
+               "Small size",
+               "High sugar content",
+               "Vibrant colors",
+               "Versatile in culinary use"
+            ],
+            "market_position":"Strong demand in fresh markets and salads",
+            "scientific_name":"Solanum lycopersicum var. cerasiforme"
+         },
+         "expected_roi_usd_per_acre":"6000 USD",
+         "expected_yield_kg_per_acre":"25,000 kg",
+         "recommended_seed_varieties":[
+            "Sweet 100",
+            "Sun Gold",
+            "Tiny Tim",
+            "Black Cherry",
+            "Sugar Rush",
+            "Yellow Pear"
+         ],
+         "regulatory_compliance_notes":"Adhere to local regulations regarding pesticide use.",
+         "recommended_selling_channels":[
+            "Farmers' markets",
+            "Direct-to-consumer sales",
+            "Specialty grocery stores",
+            "Online marketplaces"
+         ],
+         "market_price_range_usd_per_kg":"2.00 - 3.00 USD",
+         "budget_recommendation_estimated":{
+            "breakdown":{
+               "labor":"1400 USD",
+               "seeds":"200 USD",
+               "equipment":"500 USD",
+               "irrigation":"150 USD",
+               "pesticides":"80 USD",
+               "fertilizers":"120 USD"
+            },
+            "total_budget_estimated":"2450 USD"
+         },
+         "recommended_breeding_strategies":[
+            "Select for diverse fruit colors and shapes",
+            "Enhance sweetness through targeted breeding",
+            "Focus on compact growth habits for container gardening",
+            "Utilize controlled environment agriculture techniques",
+            "Incorporate disease resistance traits",
+            "Explore hybridization with larger-fruited varieties"
+         ],
+         "sowing_to_harvest_duration_days":"60-75 days"
+      },
+      {
+         "crop":"San Marzano",
+         "season":"Summer",
+         "suitable_soil":"Fertile, well-drained soil with high organic matter; pH 6.0-6.8.",
+         "fertilizer_plan":"Incorporate compost pre-planting and apply balanced fertilizer during growth.",
+         "additional_notes":"Market the unique flavor profile to enhance sales.",
+         "equipment_needed":[
+            "Soil testing kits",
+            "Trellis systems",
+            "Plastic mulch layers",
+            "Harvesting equipment",
+            "Drip irrigation setup"
+         ],
+         "ideal_temperature":"20-26°C",
+         "planting_technique":"Transplant seedlings after frost; maintain spacing of 18-24 inches.",
+         "harvesting_guidance":"Harvest when fruit is rich in color and slightly firm; avoid bruising.",
+         "irrigation_guidance":"Use drip irrigation, ensuring consistent moisture levels.",
+         "top_growing_location":"Mediterranean regions, California",
+         "pest_disease_management":"Regularly scout for pests and diseases; use resistant varieties.",
+         "variety_characteristics":{
+            "origin":"Italy",
+            "key_traits":[
+               "Rich flavor",
+               "Low moisture content",
+               "Perfect for sauces",
+               "Thick flesh"
+            ],
+            "market_position":"Premium variety in the processing industry",
+            "scientific_name":"Solanum lycopersicum"
+         },
+         "expected_roi_usd_per_acre":"4800 USD",
+         "expected_yield_kg_per_acre":"18,000 kg",
+         "recommended_seed_varieties":[
+            "San Marzano 2",
+            "San Marzano Nano",
+            "San Marzano Extra",
+            "San Marzano 3",
+            "San Marzano Red",
+            "San Marzano F1"
+         ],
+         "regulatory_compliance_notes":"Follow EU regulations for food safety if exporting.",
+         "recommended_selling_channels":[
+            "Canning companies",
+            "Local markets",
+            "Export to Europe",
+            "Restaurants"
+         ],
+         "market_price_range_usd_per_kg":"1.80 - 2.50 USD",
+         "budget_recommendation_estimated":{
+            "breakdown":{
+               "labor":"1700 USD",
+               "seeds":"400 USD",
+               "equipment":"700 USD",
+               "irrigation":"250 USD",
+               "pesticides":"150 USD",
+               "fertilizers":"200 USD"
+            },
+            "total_budget_estimated":"3400 USD"
+         },
+         "recommended_breeding_strategies":[
+            "Select for improved fruit uniformity",
+            "Focus on flavor enhancement through selective breeding",
+            "Integrate traits for drought tolerance",
+            "Utilize innovative grafting techniques",
+            "Develop hybrids for enhanced disease resistance",
+            "Incorporate precision agriculture techniques"
+         ],
+         "sowing_to_harvest_duration_days":"80-90 days"
+      },
+      {
+         "crop":"Early Girl",
+         "season":"Spring to summer",
+         "suitable_soil":"Loamy soil with good drainage; pH 6.0-6.8, rich in organic matter.",
+         "fertilizer_plan":"Apply a starter fertilizer at planting; side-dress with nitrogen during growth.",
+         "additional_notes":"Promote the early harvest advantage in marketing efforts.",
+         "equipment_needed":[
+            "Seedling trays",
+            "Drip irrigation system",
+            "Soil preparation tools",
+            "Harvesting containers",
+            "Planting tools"
+         ],
+         "ideal_temperature":"18-24°C",
+         "planting_technique":"Direct seed or transplant seedlings; space plants 12-18 inches apart.",
+         "harvesting_guidance":"Harvest when fruits are firm and fully colored; handle gently.",
+         "irrigation_guidance":"Maintain consistent moisture, particularly during flowering.",
+         "top_growing_location":"North America",
+         "pest_disease_management":"Use resistant varieties and monitor for pests; implement crop rotation.",
+         "variety_characteristics":{
+            "origin":"USA",
+            "key_traits":[
+               "Early maturation",
+               "Consistent yield",
+               "Good flavor",
+               "Adaptable"
+            ],
+            "market_position":"Well-established variety for early-season sales",
+            "scientific_name":"Solanum lycopersicum"
+         },
+         "expected_roi_usd_per_acre":"4200 USD",
+         "expected_yield_kg_per_acre":"16,000 kg",
+         "recommended_seed_varieties":[
+            "Early Girl Hybrid",
+            "Early Cascade",
+            "Early Wonder",
+            "Early Jewel",
+            "Early Goliath",
+            "Early Girl F1"
+         ],
+         "regulatory_compliance_notes":"Comply with local agricultural regulations and standards.",
+         "recommended_selling_channels":[
+            "Local produce stands",
+            "Farmers' markets",
+            "Retail grocery stores",
+            "Online sales"
+         ],
+         "market_price_range_usd_per_kg":"1.20 - 1.80 USD",
+         "budget_recommendation_estimated":{
+            "breakdown":{
+               "labor":"1400 USD",
+               "seeds":"250 USD",
+               "equipment":"600 USD",
+               "irrigation":"200 USD",
+               "pesticides":"100 USD",
+               "fertilizers":"150 USD"
+            },
+            "total_budget_estimated":"2800 USD"
+         },
+         "recommended_breeding_strategies":[
+            "Select for early maturity in various climates",
+            "Focus on flavor enhancement through sensory analysis",
+            "Integrate resistance to late blight",
+            "Utilize modern hybridization techniques",
+            "Develop varieties with extended shelf life",
+            "Incorporate precision irrigation methods"
+         ],
+         "sowing_to_harvest_duration_days":"50-70 days"
+      }
+   ],
+   "created_at":"2025-06-18T06:21:03.45348"
+}

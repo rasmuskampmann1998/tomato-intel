@@ -1,0 +1,92 @@
+[
+    {
+        "id": 3763,
+        "variety_name": "Local-pink",
+        "country_of_origin": "Bulgaria",
+        "location": "Bratzigovo, Pazardzhik",
+        "genus": "Lycopersicon",
+        "crop_name": "tomato",
+        "collection_date": "2024-09-14"
+    },
+    {
+        "id": 5493,
+        "variety_name": "Local-red",
+        "country_of_origin": "Bulgaria",
+        "location": "Bratzigovo, Pazardzhik",
+        "genus": "Lycopersicon",
+        "crop_name": "tomato",
+        "collection_date": "2024-09-14"
+    },
+    {
+        "id": 7481,
+        "variety_name": "Domate kokërr vogël",
+        "country_of_origin": "Albania",
+        "location": "Vig Mnellë, Shkodër",
+        "genus": "Solanum",
+        "crop_name": "Cherry tomatoe",
+        "collection_date": "2023-11-14"
+    },
+    {
+        "id": 7482,
+        "variety_name": "PÖRBÖLYI TF.",
+        "country_of_origin": "Hungary",
+        "location": "Pörböly",
+        "genus": "Lycopersicon",
+        "crop_name": "garden tomato",
+        "collection_date": "2023-11-14"
+    },
+    {
+        "id": 7317,
+        "variety_name": "Domate Sanjollase e kuqe",
+        "country_of_origin": "Albania",
+        "location": "Fshati Cerckë - Leskovik",
+        "genus": "Solanum",
+        "crop_name": "tomato",
+        "collection_date": "2023-10-30"
+    },
+    {
+        "id": 7823,
+        "variety_name": "Domate Koke dashi",
+        "country_of_origin": "Albania",
+        "location": "Fshati Taç, Kolonje",
+        "genus": "Solanum",
+        "crop_name": "tomato",
+        "collection_date": "2023-10-30"
+    },
+    {
+        "id": 5460,
+        "variety_name": "DOMATE E VERDHË",
+        "country_of_origin": "Albania",
+        "location": "Fshati Qafzez",
+        "genus": "Solanum",
+        "crop_name": "tomato",
+        "collection_date": "2023-10-30"
+    },
+    {
+        "id": 3949,
+        "variety_name": "DOMATE VENDI",
+        "country_of_origin": "Albania",
+        "location": "Fshati Iljar-Permet",
+        "genus": "Solanum",
+        "crop_name": "tomato",
+        "collection_date": "2023-10-30"
+    },
+    {
+        "id": 3569,
+        "variety_name": "Domate Serrëke",
+        "country_of_origin": "Albania",
+        "location": "Neviçisht, Korçë",
+        "genus": "Solanum",
+        "crop_name": "tomato",
+        "collection_date": "2023-10-19"
+    },
+    {
+        "id": 3954,
+        "variety_name": "Domate vendi zemër kau",
+        "country_of_origin": "Albania",
+        "location": "Tërpan, Polican",
+        "genus": "Solanum",
+        "crop_name": "tomato",
+        "collection_date": "2023-09-11"
+    }
+]
