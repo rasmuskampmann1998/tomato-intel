@@ -24,9 +24,10 @@ HEADERS = {
 # Per-domain CSS selectors — override source-level css_selector if needed
 DOMAIN_SELECTORS = {
     "hortiadvisor.com":       [".news-item h3 a", ".article-title a", "h3 a"],
-    "gfactueel.nl":           [".nieuws-item a", ".article-item h3 a", "h3 a"],
-    "greentech.nl":           [".article-teaser h3 a", ".news-card a", "h2 a"],
-    "gartnertidende.dk":      ["article h3 a", ".post-title a", "h2 a"],
+    "hortidaily.com":         ["a[href*='/article/']"],
+    "gfactueel.nl":           [".nieuws-item__title a", ".article-header a", ".nieuws-item a", ".article-item h3 a", "h2 a", "h3 a"],
+    "greentech.nl":           [".article__title a", ".news-item__title a", ".article-teaser h3 a", ".news-card a", "h2 a"],
+    "gartnertidende.dk":      [".teaser__title a", ".article-title a", "article h2 a", "article h3 a", ".post-title a"],
     "veggiesfrommexico.com":  [".post-title a", "article h2 a", "h3 a"],
     "ahsgardening.org":       [".post-title a", "article h2 a", "h3 a"],
     "revistas.chapingo.mx":   [".article-title a", ".titulo a", "h3 a"],
@@ -35,6 +36,9 @@ DOMAIN_SELECTORS = {
     "bejo.com":               [".news-card h3 a", "article h3 a", "h3 a"],
     "deruiterseeds.com":      ["article h3 a", ".news-item h3 a", "h3 a"],
     "syngenta.com":           [".news-card h3 a", "article h3 a", "h3 a"],
+    "apnews.com":             ["h3.PagePromo-title a", "[data-key='card-headline'] a", ".PagePromo-title a", "h2 a"],
+    "hortweek.com":           [".article-list-item h3 a", ".teaser__title a", "article h2 a", "h3 a"],
+    "academic.oup.com":       [".sri-title a", ".article-link a", "h3.title a", "h3 a"],
 }
 
 # Generic fallback selectors tried in order

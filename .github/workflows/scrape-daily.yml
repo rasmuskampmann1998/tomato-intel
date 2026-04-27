@@ -24,14 +24,19 @@ jobs:
         working-directory: market-intelligence
         run: pip install -r requirements.txt
 
+      - name: Install Playwright Chromium
+        working-directory: market-intelligence
+        run: playwright install chromium --with-deps
+
       - name: Scrape news sources
         working-directory: market-intelligence
-        run: python scrapers/run_scrapers.py --categories news
+        run: python scrapers/run_scrapers.py --categories news,competitors
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          ZENROWS_API_KEY: ${{ secrets.ZENROWS_API_KEY }}
 
       - name: Scrape social media
         working-directory: market-intelligence

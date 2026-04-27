@@ -5,8 +5,10 @@
         {
           "name": "Hortidaily",
           "url": "https://www.hortidaily.com",
-          "rss_url": "https://www.hortidaily.com/rss/",
-          "scrape_type": "rss",
+          "rss_url": "https://www.hortidaily.com/feed/",
+          "scrape_type": "html",
+          "css_selector": "a[href*='/article/']",
+          "fetch_content": true,
           "language": "en",
           "is_required": true
         },
@@ -37,7 +39,7 @@
         {
           "name": "AP News Agriculture",
           "url": "https://apnews.com/hub/agriculture",
-          "rss_url": "https://rsshub.app/apnews/topics/agriculture",
+          "rss_url": "https://feeds.ap.org/rss/apf-agriculture",
           "scrape_type": "rss",
           "language": "en",
           "is_required": true
@@ -70,7 +72,7 @@
         {
           "name": "GFActueel.nl",
           "url": "https://www.gfactueel.nl",
-          "rss_url": "https://www.gfactueel.nl/rss",
+          "rss_url": "https://www.gfactueel.nl/rss/nieuws/",
           "scrape_type": "rss",
           "language": "nl",
           "is_required": true

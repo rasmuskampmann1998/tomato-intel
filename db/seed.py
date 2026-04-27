@@ -70,6 +70,7 @@ def seed(reset: bool = False):
                 "rss_url": source.get("rss_url"),
                 "scrape_type": source.get("scrape_type", "html"),
                 "apify_actor": source.get("apify_actor"),
+                "css_selector": source.get("css_selector"),
                 "language": source.get("language", "en"),
                 "is_required": source.get("is_required", False),
                 "active": True,

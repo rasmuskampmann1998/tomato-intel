@@ -21,13 +21,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from db.client import supabase
 from scrapers.rss_scraper import scrape_rss
 from scrapers.html_scraper import scrape_html
-from scrapers.apify_scraper import scrape_apify_web
+from scrapers.playwright_scraper import scrape_playwright
+from scrapers.zenrows_scraper import scrape_zenrows
+from scrapers.apify_scraper import scrape_apify_web, scrape_apify_content_crawler
+from scrapers.claude_scraper import scrape_claude
+from scrapers.crossref_scraper import scrape_crossref, JOURNAL_ISSNS
+from scrapers.article_enricher import enrich_items
 from scrapers.patent_epo import search_epo
 from scrapers.patent_uspto import search_uspto
 from scrapers.patent_cnipa import search_cnipa, search_ip_india
 from scrapers.social_scraper import run_social_scrape
 
 CONFIG_PATH = Path(__file__).parent.parent / "config" / "sources.json"
+
+# Sources that need full article body text fetched after link extraction
+FETCH_CONTENT_SOURCES = {"Hortidaily", "Seed World", "Krishijagran (Indian Agriculture)"}
 
 # Default tomato search terms used for patent/social scraping
 DEFAULT_SEARCH_TERMS = [
@@ -136,30 +144,66 @@ def run_category(category_slug: str, sources: list[dict], search_terms: list[str
 
         return total
 
-    # News / competitors / regulations / crops / genetics — use layered scrapers
+    # News / competitors / regulations / crops / genetics
+    # 5-layer fallback: RSS → HTML → Playwright → ZenRows → Apify (web or content-crawler)
     for source in sources:
         source_id = source.get("id", "")
         scrape_type = source.get("scrape_type", "html")
         items = []
 
         try:
-            if scrape_type == "rss":
+            # Layer 0: Crossref API (free, official) for academic journals with known ISSN
+            # Runs before RSS/HTML — avoids wasting time on bot-blocked journal sites
+            if source.get("name") in JOURNAL_ISSNS or source.get("crossref_issn"):
+                items = scrape_crossref(source)
+                if items:
+                    logger.info(f"Crossref succeeded for {source['name']}: {len(items)} papers")
+
+            # Layer 1: RSS
+            if not items and scrape_type == "rss":
                 items = scrape_rss(source)
-                if not items:
-                    logger.info(f"RSS empty for {source['name']}, trying HTML fallback")
-                    items = scrape_html(source)
-                if not items:
-                    logger.info(f"HTML empty for {source['name']}, trying Apify fallback")
-                    items = scrape_apify_web(source)
 
-            elif scrape_type == "html":
+            # Layer 2: httpx + BeautifulSoup (HTML)
+            if not items and scrape_type in ("rss", "html"):
+                if scrape_type == "rss":
+                    logger.info(f"RSS→HTML fallback for {source['name']}")
                 items = scrape_html(source)
-                if not items:
-                    logger.info(f"HTML empty for {source['name']}, trying Apify fallback")
-                    items = scrape_apify_web(source)
 
-            elif scrape_type == "apify":
+            # Layer 3: Playwright (headless Chromium, free, handles JS rendering)
+            if not items:
+                logger.info(f"HTML→Playwright fallback for {source['name']}")
+                items = scrape_playwright(source)
+
+            # Layer 4: ZenRows (anti-bot bypass + JS rendering, ~$0.001/req)
+            if not items:
+                logger.info(f"Playwright→ZenRows fallback for {source['name']}")
+                items = scrape_zenrows(source)
+
+            is_required = source.get("is_required", False)
+
+            # Layer 5a: Apify web-scraper (rotating proxies, ~$0.05/run)
+            # Only for required sources or explicit apify type — avoids quota exhaustion on free tier
+            if not items and scrape_type == "apify":
                 items = scrape_apify_web(source)
+            elif not items and scrape_type != "apify" and is_required:
+                logger.info(f"ZenRows→Apify fallback for {source['name']}")
+                items = scrape_apify_web(source)
+
+            # Layer 5b: Apify website-content-crawler (AI-powered, last resort, ~$0.10/run)
+            # Only for required sources
+            if not items and is_required:
+                logger.info(f"Apify→ContentCrawler fallback for {source['name']}")
+                items = scrape_apify_content_crawler(source)
+
+            # Layer 6: Claude Haiku AI scraper (no CSS selectors, reads HTML intelligently)
+            # Final fallback — ~$0.0002/page, only for required sources still returning 0
+            if not items and is_required:
+                logger.info(f"All layers failed → Claude AI scraper for {source['name']}")
+                items = scrape_claude(source)
+
+            # Article content enrichment (fetch full body text for designated sources)
+            if items and (source.get("fetch_content") or source.get("name") in FETCH_CONTENT_SOURCES):
+                items = enrich_items(items, delay=0.3)
 
             status = "ok" if items else "empty"
         except Exception as e:
