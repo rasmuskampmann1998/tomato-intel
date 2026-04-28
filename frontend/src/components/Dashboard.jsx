@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useUserProfile } from '../hooks/useUserProfile'
+import { getCategoryOrder, EXPERIENCE_CONFIG } from '../lib/experienceConfig'
 import CategorySidebar from './CategorySidebar'
 import SearchProfiles from './SearchProfiles'
 import ResultsFeed from './ResultsFeed'
-import SourceManager from './SourceManager'
+import SourcePreferences from './SourcePreferences'
 
 export default function Dashboard() {
   const [user, setUser] = useState(null)
@@ -13,6 +15,11 @@ export default function Dashboard() {
   const [selectedProfile, setSelectedProfile] = useState(null)
   const [badgeCounts, setBadgeCounts] = useState({})
   const [showSources, setShowSources] = useState(false)
+  const [followedSourceIds, setFollowedSourceIds] = useState([])
+
+  const { profile } = useUserProfile(user?.id)
+  const experience = profile?.experience || 'researcher'
+  const expConfig = EXPERIENCE_CONFIG[experience] || EXPERIENCE_CONFIG.researcher
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -21,8 +28,20 @@ export default function Dashboard() {
         loadUserRole(data.user.id)
       }
     })
-    loadCategories()
   }, [])
+
+  useEffect(() => {
+    if (user?.id) loadFollowedSourceIds(user.id)
+  }, [user?.id])
+
+  // Re-order categories whenever experience loads
+  useEffect(() => {
+    if (categories.length && profile) {
+      const ordered = getCategoryOrder(experience, categories)
+      setCategories(ordered)
+      setSelectedCategory(prev => prev || ordered[0])
+    }
+  }, [profile?.experience])
 
   const loadUserRole = async (userId) => {
     const { data } = await supabase
@@ -37,15 +56,23 @@ export default function Dashboard() {
     const { data } = await supabase
       .from('categories')
       .select('*')
-      .order('name')
+      .order('sort_order')
     if (data?.length) {
       setCategories(data)
       setSelectedCategory(data[0])
     }
   }
 
+  const loadFollowedSourceIds = async (userId) => {
+    const { data } = await supabase
+      .from('user_source_prefs')
+      .select('source_id')
+      .eq('user_id', userId)
+      .eq('is_followed', true)
+    setFollowedSourceIds((data || []).map(r => r.source_id))
+  }
+
   const loadBadgeCounts = async () => {
-    // Aggregate new_since_last_visit per category by joining search_profiles
     const { data } = await supabase
       .from('search_profiles')
       .select('category_id, new_since_last_visit')
@@ -57,9 +84,8 @@ export default function Dashboard() {
     setBadgeCounts(counts)
   }
 
-  useEffect(() => {
-    loadBadgeCounts()
-  }, [selectedCategory])
+  useEffect(() => { loadCategories() }, [])
+  useEffect(() => { loadBadgeCounts() }, [selectedCategory])
 
   const handleCategorySelect = (cat) => {
     setSelectedCategory(cat)
@@ -71,6 +97,12 @@ export default function Dashboard() {
     await supabase.auth.signOut()
   }
 
+  const handleSourcePrefChange = (sourceId, isFollowed) => {
+    setFollowedSourceIds(prev =>
+      isFollowed ? [...prev, sourceId] : prev.filter(id => id !== sourceId)
+    )
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -79,18 +111,19 @@ export default function Dashboard() {
           <span className="text-green-600 text-xl">🍅</span>
           <div>
             <span className="font-bold text-gray-900 text-sm">Tomato Intel</span>
-            <span className="text-gray-400 text-xs ml-2">Market Intelligence</span>
+            <span className="text-gray-400 text-xs ml-2">{expConfig.description}</span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Experience badge */}
+          <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium bg-${expConfig.color}-100 text-${expConfig.color}-700`}>
+            {expConfig.icon} {expConfig.label}
+          </span>
           {userRole === 'admin' && (
             <span className="text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5">admin</span>
           )}
           <span className="text-sm text-gray-600">{user?.email}</span>
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={handleSignOut} className="text-sm text-gray-400 hover:text-gray-600">
             Sign out
           </button>
         </div>
@@ -98,7 +131,6 @@ export default function Dashboard() {
 
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
         <CategorySidebar
           categories={categories}
           selected={selectedCategory}
@@ -106,11 +138,9 @@ export default function Dashboard() {
           badgeCounts={badgeCounts}
         />
 
-        {/* Main panel */}
         <main className="flex-1 overflow-y-auto p-6">
           {selectedCategory && (
             <div className="max-w-4xl mx-auto space-y-6">
-              {/* Category header */}
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-lg font-bold text-gray-900">{selectedCategory.name}</h1>
@@ -126,17 +156,18 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Sources panel (toggleable) */}
               {showSources && (
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <SourceManager
+                  <SourcePreferences
                     category={selectedCategory}
+                    userId={user?.id}
                     isAdmin={userRole === 'admin'}
+                    followedSourceIds={followedSourceIds}
+                    onPrefChange={handleSourcePrefChange}
                   />
                 </div>
               )}
 
-              {/* Search profiles */}
               <div className="bg-white rounded-xl border border-gray-200 p-4">
                 <SearchProfiles
                   category={selectedCategory}
@@ -145,15 +176,16 @@ export default function Dashboard() {
                 />
               </div>
 
-              {/* Results feed */}
-              {selectedProfile && (
+              {selectedProfile ? (
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <ResultsFeed profile={selectedProfile} />
+                  <ResultsFeed
+                    profile={selectedProfile}
+                    cardStyle={expConfig.cardStyle}
+                    followedSourceIds={followedSourceIds}
+                    userId={user?.id}
+                  />
                 </div>
-              )}
-
-              {/* Empty state before profile selected */}
-              {!selectedProfile && (
+              ) : (
                 <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-400">
                   Select a search profile above to view matching results
                 </div>

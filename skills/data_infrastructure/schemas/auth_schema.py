@@ -6,9 +6,11 @@ from typing import Optional
 
 # Model for user signup request
 class SignupRequest(BaseModel):
-    email: EmailStr  # User's email address
-    full_name: Optional[str] = None  # Optional full name of the user
-    password: str  # User's password
+    email: EmailStr
+    full_name: Optional[str] = None
+    password: str
+    experience: Optional[str] = "researcher"   # "researcher" | "grower" | "breeder"
+    organization: Optional[str] = None
 
 # Model for user login request
 class LoginRequest(BaseModel):

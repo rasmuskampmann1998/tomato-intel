@@ -103,6 +103,24 @@ def create_user_with_default_role(user_data):
         "role_id": role_id
     }).execute()
 
+    # Step 4: Upsert user_profiles with experience + organization
+    experience = getattr(user_data, "experience", "researcher") or "researcher"
+    organization = getattr(user_data, "organization", None)
+    supabase.table("user_profiles").upsert({
+        "id": user_id,
+        "full_name": user_data.full_name,
+        "organization": organization,
+        "experience": experience,
+    }, on_conflict="id").execute()
+    logger.info(f"user_profiles upserted for {user_id} (experience: {experience})")
+
+    # Step 5: Seed source preferences for the chosen experience type
+    try:
+        from supabase_service.source_service import seed_prefs_for_user
+        seed_prefs_for_user(user_id, experience)
+    except Exception as e:
+        logger.warning(f"Could not seed source prefs for {user_id}: {e}")
+
     # Return the created user with role data
     logger.info(f"User {user_data.email} created successfully with 'researcher' role")
     return get_user_with_roles_by_email(user_data.email)

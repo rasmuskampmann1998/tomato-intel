@@ -18,7 +18,8 @@ from routes import (
     genetic_routes,
     social_media_routes,
     weekly_data_routes,
-    monthly_data_routes
+    monthly_data_routes,
+    source_routes,
 )
 from schedulers.scheduler import start_schedulers
 
@@ -62,6 +63,7 @@ app.include_router(genetic_routes.router)
 app.include_router(social_media_routes.router)
 app.include_router(weekly_data_routes.router)
 app.include_router(monthly_data_routes.router)
+app.include_router(source_routes.router)
 # Entry point to run the application
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8004, reload=False)
