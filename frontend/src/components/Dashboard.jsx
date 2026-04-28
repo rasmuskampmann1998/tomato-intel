@@ -8,8 +8,8 @@ import ResultsFeed from './ResultsFeed'
 import SourcePreferences from './SourcePreferences'
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null)
-  const [userRole, setUserRole] = useState('user')
+  const [user] = useState(null)  // demo: no auth
+  const [userRole] = useState('user')
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedProfile, setSelectedProfile] = useState(null)
@@ -17,22 +17,9 @@ export default function Dashboard() {
   const [showSources, setShowSources] = useState(false)
   const [followedSourceIds, setFollowedSourceIds] = useState([])
 
-  const { profile } = useUserProfile(user?.id)
-  const experience = profile?.experience || 'researcher'
-  const expConfig = EXPERIENCE_CONFIG[experience] || EXPERIENCE_CONFIG.researcher
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) {
-        setUser(data.user)
-        loadUserRole(data.user.id)
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    if (user?.id) loadFollowedSourceIds(user.id)
-  }, [user?.id])
+  const { profile } = useUserProfile(null)
+  const experience = 'researcher'
+  const expConfig = EXPERIENCE_CONFIG[experience]
 
   // Re-order categories whenever experience loads
   useEffect(() => {
@@ -43,15 +30,6 @@ export default function Dashboard() {
     }
   }, [profile?.experience])
 
-  const loadUserRole = async (userId) => {
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', userId)
-      .single()
-    if (data?.role) setUserRole(data.role)
-  }
-
   const loadCategories = async () => {
     const { data } = await supabase
       .from('categories')
@@ -61,15 +39,6 @@ export default function Dashboard() {
       setCategories(data)
       setSelectedCategory(data[0])
     }
-  }
-
-  const loadFollowedSourceIds = async (userId) => {
-    const { data } = await supabase
-      .from('user_source_prefs')
-      .select('source_id')
-      .eq('user_id', userId)
-      .eq('is_followed', true)
-    setFollowedSourceIds((data || []).map(r => r.source_id))
   }
 
   const loadBadgeCounts = async () => {
@@ -93,10 +62,6 @@ export default function Dashboard() {
     setShowSources(false)
   }
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-  }
-
   const handleSourcePrefChange = (sourceId, isFollowed) => {
     setFollowedSourceIds(prev =>
       isFollowed ? [...prev, sourceId] : prev.filter(id => id !== sourceId)
@@ -115,17 +80,10 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {/* Experience badge */}
-          <span className={`text-xs rounded-full px-2.5 py-0.5 font-medium bg-${expConfig.color}-100 text-${expConfig.color}-700`}>
+          <span className="text-xs rounded-full px-2.5 py-0.5 font-medium bg-blue-100 text-blue-700">
             {expConfig.icon} {expConfig.label}
           </span>
-          {userRole === 'admin' && (
-            <span className="text-xs bg-purple-100 text-purple-700 rounded px-2 py-0.5">admin</span>
-          )}
-          <span className="text-sm text-gray-600">{user?.email}</span>
-          <button onClick={handleSignOut} className="text-sm text-gray-400 hover:text-gray-600">
-            Sign out
-          </button>
+          <span className="text-xs bg-gray-100 text-gray-500 rounded px-2 py-0.5">Demo</span>
         </div>
       </header>
 

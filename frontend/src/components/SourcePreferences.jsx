@@ -38,16 +38,20 @@ function SourceRow({ source, isFollowed, isAdmin, onToggleFollow, onToggleActive
       </td>
       <td className="py-2.5 px-3 text-xs text-gray-400">{lastScraped}</td>
       <td className="py-2.5 px-3">
-        <button
-          onClick={() => onToggleFollow(source.id, !isFollowed)}
-          className={`text-xs rounded px-2.5 py-1 font-medium transition ${
-            isFollowed
-              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-          }`}
-        >
-          {isFollowed ? 'Following' : 'Follow'}
-        </button>
+        {onToggleFollow ? (
+          <button
+            onClick={() => onToggleFollow(source.id, !isFollowed)}
+            className={`text-xs rounded px-2.5 py-1 font-medium transition ${
+              isFollowed
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            }`}
+          >
+            {isFollowed ? 'Following' : 'Follow'}
+          </button>
+        ) : (
+          <span className="text-xs text-gray-400">—</span>
+        )}
       </td>
       {isAdmin && (
         <td className="py-2.5 px-3">
