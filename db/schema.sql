@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS search_profiles (
   search_terms text[] NOT NULL,
   languages text[] DEFAULT '{"en"}',
   frequency text DEFAULT 'weekly',
+  intelligence_brief text,
   last_run_at timestamptz,
   new_since_last_visit int DEFAULT 0,
   created_at timestamptz DEFAULT now()
@@ -116,6 +117,7 @@ CREATE TABLE IF NOT EXISTS profile_items (
   scraped_item_id uuid REFERENCES scraped_items(id) ON DELETE CASCADE,
   matched_at timestamptz DEFAULT now(),
   is_new boolean DEFAULT true,
+  profile_relevance_score int,
   UNIQUE(search_profile_id, scraped_item_id)
 );
 

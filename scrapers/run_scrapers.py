@@ -145,7 +145,7 @@ def run_category(category_slug: str, sources: list[dict], search_terms: list[str
         return total
 
     # News / competitors / regulations / crops / genetics
-    # 5-layer fallback: RSS → HTML → Playwright → ZenRows → Apify (web or content-crawler)
+    # 7-layer fallback: Crossref → RSS → HTML → Playwright → ZenRows → Claude → Apify
     for source in sources:
         source_id = source.get("id", "")
         scrape_type = source.get("scrape_type", "html")
@@ -181,29 +181,34 @@ def run_category(category_slug: str, sources: list[dict], search_terms: list[str
 
             is_required = source.get("is_required", False)
 
-            # Layer 5a: Apify web-scraper (rotating proxies, ~$0.05/run)
-            # Only for required sources or explicit apify type — avoids quota exhaustion on free tier
+            # Layer 5: Claude Haiku AI scraper (~$0.0002/page)
+            # Cheaper than Apify — run first for required non-apify sources
+            if not items and is_required and scrape_type != "apify":
+                logger.info(f"ZenRows→Claude fallback for {source['name']}")
+                items = scrape_claude(source)
+
+            # Layer 6a: Apify web-scraper (rotating proxies, ~$0.05/run)
+            # For explicit apify-typed sources or required sources still returning 0
             if not items and scrape_type == "apify":
                 items = scrape_apify_web(source)
-            elif not items and scrape_type != "apify" and is_required:
-                logger.info(f"ZenRows→Apify fallback for {source['name']}")
+            elif not items and is_required:
+                logger.info(f"Claude→Apify fallback for {source['name']}")
                 items = scrape_apify_web(source)
 
-            # Layer 5b: Apify website-content-crawler (AI-powered, last resort, ~$0.10/run)
+            # Layer 6b: Apify website-content-crawler (AI-powered, last resort, ~$0.10/run)
             # Only for required sources
             if not items and is_required:
                 logger.info(f"Apify→ContentCrawler fallback for {source['name']}")
                 items = scrape_apify_content_crawler(source)
 
-            # Layer 6: Claude Haiku AI scraper (no CSS selectors, reads HTML intelligently)
-            # Final fallback — ~$0.0002/page, only for required sources still returning 0
-            if not items and is_required:
-                logger.info(f"All layers failed → Claude AI scraper for {source['name']}")
-                items = scrape_claude(source)
-
             # Article content enrichment (fetch full body text for designated sources)
             if items and (source.get("fetch_content") or source.get("name") in FETCH_CONTENT_SOURCES):
                 items = enrich_items(items, delay=0.3)
+
+            # Stamp source_id on every item so the FK is saved to DB
+            if items and source_id:
+                for item in items:
+                    item.setdefault("source_id", source_id)
 
             status = "ok" if items else "empty"
         except Exception as e:

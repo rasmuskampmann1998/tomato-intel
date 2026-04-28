@@ -20,7 +20,7 @@ function ProfileCard({ profile, selected, onSelect, onEdit, onDelete }) {
             {profile.name || profile.search_terms.join(', ')}
           </p>
           <p className="text-xs text-gray-500 mt-0.5">
-            {profile.search_terms.join(' Â· ')}
+            {profile.search_terms.join(' · ')}
           </p>
           {profile.intelligence_brief && (
             <p className="text-xs text-blue-600 mt-1">AI brief active</p>
