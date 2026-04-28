@@ -13,6 +13,9 @@ playwright>=1.44.0
 # Apify
 apify-client==1.8.1
 
+# Firecrawl (free tier: 100 req/month — handles JS + CAPTCHAs)
+firecrawl-py>=1.0.0
+
 # Social media
 praw==7.7.1
 langchain-community==0.2.16

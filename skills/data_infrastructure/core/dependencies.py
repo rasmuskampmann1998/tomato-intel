@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 import os
@@ -6,6 +6,9 @@ from loguru import logger  # Loguru import for logging
 
 # OAuth2 password bearer used to retrieve the token from requests
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# Optional variant — does not raise 403 when Authorization header is absent (for demo/public endpoints)
+_oauth2_optional = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 # JWT settings (secret key and algorithm) fetched from environment variables
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -64,6 +67,22 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
         "email": email,
         "role": role
     }
+
+
+def get_current_user_optional(token: str = Security(_oauth2_optional)) -> dict:
+    """Returns a demo user dict when no token is provided — allows unauthenticated demo access."""
+    if not token:
+        return {"id": None, "email": "demo", "role": "user"}
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        email = payload.get("email")
+        role = payload.get("role", "user")
+        if user_id and email:
+            return {"id": user_id, "email": email, "role": role}
+    except JWTError:
+        pass
+    return {"id": None, "email": "demo", "role": "user"}
 
 
 def require_researcher(current_user=Depends(get_current_user)):

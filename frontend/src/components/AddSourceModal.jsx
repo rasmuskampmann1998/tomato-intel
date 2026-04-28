@@ -57,8 +57,7 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
     setError('')
 
     const { data: { session } } = await supabase.auth.getSession()
-    const token = session?.access_token
-    if (!token) { setError('Not authenticated'); setPhase('input'); return }
+    const token = session?.access_token  // undefined in demo mode — backend handles it
 
     // Derive source name from URL hostname as default
     try {
@@ -68,7 +67,7 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
     const endpoint = `${API_BASE}/sources/analyze?url=${encodeURIComponent(url)}&category_slug=${category.slug}`
 
     await fetchEventSource(endpoint, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
       onopen(response) {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
       },
@@ -109,14 +108,14 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
     if (!winningConfig || !sourceName.trim()) return
     setSaving(true)
     const { data: { session } } = await supabase.auth.getSession()
-    const token = session?.access_token
+    const token = session?.access_token  // undefined in demo mode — backend handles it
 
     try {
       const res = await fetch(`${API_BASE}/sources/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           url,

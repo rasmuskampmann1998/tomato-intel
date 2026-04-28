@@ -30,7 +30,7 @@ def get_unprocessed(limit: int = 100) -> list[dict]:
     try:
         resp = (
             supabase.table("scraped_items")
-            .select("id,title,content,language,category_slug,url,platform")
+            .select("id,title,content,language,category_slug,url,platform,source_id")
             .eq("is_processed", False)
             .order("scraped_at", desc=True)
             .limit(limit)
@@ -102,7 +102,7 @@ def interpret_batch(items: list[dict], client: anthropic.Anthropic) -> list[dict
         return []
 
 
-def save_interpretations(interpretations: list[dict], dry_run: bool = False) -> int:
+def save_interpretations(interpretations: list[dict], source_items: list[dict], dry_run: bool = False) -> int:
     """Upsert into interpreted_items and mark scraped_items as processed."""
     if not interpretations:
         return 0
@@ -121,6 +121,9 @@ def save_interpretations(interpretations: list[dict], dry_run: bool = False) -> 
         if not scraped_id:
             continue
 
+        source_item = next((i for i in source_items if i["id"] == scraped_id), {})
+        original_language = source_item.get("language") or interp.get("language") or "en"
+
         row = {
             "scraped_item_id": scraped_id,
             "title_en": interp.get("title_en", ""),
@@ -128,6 +131,7 @@ def save_interpretations(interpretations: list[dict], dry_run: bool = False) -> 
             "relevance_score": interp.get("relevance_score", 5),
             "tags": interp.get("tags", []),
             "category_slug": interp.get("category_slug", ""),
+            "original_language": original_language,
         }
 
         try:
@@ -179,7 +183,7 @@ def main():
         batch = items[i:i + BATCH_SIZE]
         logger.info(f"Processing batch {i//BATCH_SIZE + 1}: {len(batch)} items")
         interpretations = interpret_batch(batch, client)
-        saved = save_interpretations(interpretations, dry_run)
+        saved = save_interpretations(interpretations, batch, dry_run)
         total_saved += saved
         logger.info(f"Batch done: {saved}/{len(batch)} saved")
 

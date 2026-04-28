@@ -1,15 +1,18 @@
 """
 agent_scraper.py — Agentic URL analysis loop
 
-Tries 5 strategies in cost order until one returns ≥1 article.
+Tries 8 strategies in cost order until one returns ≥1 article.
 Yields status dicts for SSE streaming to the frontend.
 
 Strategy order (cheapest first):
-  1. RSS detection  — free (parse <link> tags)
-  2. Claude Sonnet  — ~$0.003 (page structure analysis → config)
-  3. HTML/Playwright — free (test Claude's suggested config)
-  4. Claude Haiku   — ~$0.0002 (direct extraction, no config)
-  5. Apify          — ~$0.05 (rotating proxies, last resort)
+  1. RSS detection      — free  (parse <link> tags in HTML)
+  2. Claude Sonnet      — ~$0.003 (page structure analysis → config)
+  3. HTML/Playwright    — free  (test Claude's suggested config)
+  4. Jina AI Reader     — free  (r.jina.ai renders JS → markdown → extract links)
+  5. ZenRows            — ~$0.001 (anti-bot residential proxies → HTML → CSS selector)
+  6. Firecrawl          — free tier (JS render → structured links, 100 req/month)
+  7. Claude Haiku       — ~$0.0002 (direct LLM extraction from raw HTML)
+  8. Apify              — ~$0.05  (rotating proxies, last resort)
 
 Usage (from source_routes.py):
   async for status in analyze_url(url, category_slug, user_id):
@@ -33,7 +36,6 @@ import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
 
-# Ensure project root is on path so scraper imports work
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
@@ -50,7 +52,7 @@ HEADERS = {
 }
 
 
-# ── Sync helpers (run via executor) ──────────────────────────────────────────
+# ── Sync helpers ──────────────────────────────────────────────────────────────
 
 def _fetch_html(url: str) -> Optional[str]:
     try:
@@ -155,6 +157,22 @@ def _test_playwright_scrape(url: str, css_selector: str) -> list[dict]:
                               "css_selector": css_selector, "scrape_type": "playwright", "language": "en"})
 
 
+def _test_jina(url: str) -> list[dict]:
+    from scrapers.jina_scraper import scrape_jina
+    return scrape_jina({"name": "agent-test", "url": url, "language": "en"})
+
+
+def _test_zenrows(url: str, css_selector: str) -> list[dict]:
+    from scrapers.zenrows_scraper import scrape_zenrows
+    return scrape_zenrows({"name": "agent-test", "url": url,
+                           "css_selector": css_selector, "scrape_type": "zenrows", "language": "en"})
+
+
+def _test_firecrawl(url: str) -> list[dict]:
+    from scrapers.firecrawl_scraper import scrape_firecrawl
+    return scrape_firecrawl({"name": "agent-test", "url": url, "language": "en"})
+
+
 def _test_apify(url: str) -> list[dict]:
     from scrapers.apify_scraper import scrape_apify_web
     return scrape_apify_web({"name": "agent-test", "url": url, "scrape_type": "apify", "language": "en"})
@@ -180,6 +198,7 @@ async def analyze_url(
     """
     loop = asyncio.get_event_loop()
     html: Optional[str] = None
+    claude_cfg: dict = {}
 
     # ── Strategy 1: RSS detection ─────────────────────────────
     yield _status(1, "RSS detection", "running", 0, None, "Fetching page...")
@@ -213,7 +232,7 @@ async def analyze_url(
     claude_cfg = await loop.run_in_executor(None, _claude_analyze_html, html, url)
     if not claude_cfg:
         yield _status(2, "Claude analysis", "failed", 0, None,
-                      "Claude returned no config — moving to direct extraction.")
+                      "Claude returned no config — trying fallback strategies.")
     else:
         yield _status(2, "Claude analysis", "running", 0, claude_cfg,
                       f"Claude recommends: {claude_cfg.get('scrape_type')} "
@@ -247,8 +266,66 @@ async def analyze_url(
         yield _status(3, f"{label} scrape", "failed", 0, None,
                       f"{label} scrape returned 0 items.")
 
-    # ── Strategy 4: Claude Haiku direct extraction ────────────
-    yield _status(4, "Claude Haiku extraction", "running", 0, None,
+    # ── Strategy 4: Jina AI Reader ────────────────────────────
+    yield _status(4, "Jina AI Reader", "running", 0, None,
+                  "Trying Jina AI Reader (free JS rendering, no API key needed)...")
+    try:
+        items = await loop.run_in_executor(None, _test_jina, url)
+    except Exception as e:
+        logger.warning(f"[agent] Jina error: {e}")
+        items = []
+
+    if items:
+        config = {"scrape_type": "html", "rss_url": None,
+                  "css_selector": None, "language": claude_cfg.get("language", "en")}
+        yield _status(4, "Jina AI Reader", "success", len(items), config,
+                      f"Jina extracted {len(items)} article links.")
+        yield _status(0, "complete", "success", len(items), config, "Source ready to add.")
+        return
+    yield _status(4, "Jina AI Reader", "failed", 0, None,
+                  "Jina returned 0 article links.")
+
+    # ── Strategy 5: ZenRows (anti-bot) ───────────────────────
+    css = claude_cfg.get("css_selector") or ""
+    yield _status(5, "ZenRows scrape", "running", 0, None,
+                  "Trying ZenRows anti-bot scraper (~$0.001, residential proxies)...")
+    try:
+        items = await loop.run_in_executor(None, _test_zenrows, url, css)
+    except Exception as e:
+        logger.warning(f"[agent] ZenRows error: {e}")
+        items = []
+
+    if items:
+        config = {"scrape_type": "html", "rss_url": None,
+                  "css_selector": css or None, "language": claude_cfg.get("language", "en")}
+        yield _status(5, "ZenRows scrape", "success", len(items), config,
+                      f"ZenRows bypassed bot protection — {len(items)} articles.")
+        yield _status(0, "complete", "success", len(items), config, "Source ready to add.")
+        return
+    yield _status(5, "ZenRows scrape", "failed", 0, None,
+                  "ZenRows returned 0 items.")
+
+    # ── Strategy 6: Firecrawl ─────────────────────────────────
+    yield _status(6, "Firecrawl", "running", 0, None,
+                  "Trying Firecrawl (free tier, structured link extraction)...")
+    try:
+        items = await loop.run_in_executor(None, _test_firecrawl, url)
+    except Exception as e:
+        logger.warning(f"[agent] Firecrawl error: {e}")
+        items = []
+
+    if items:
+        config = {"scrape_type": "html", "rss_url": None,
+                  "css_selector": None, "language": claude_cfg.get("language", "en")}
+        yield _status(6, "Firecrawl", "success", len(items), config,
+                      f"Firecrawl extracted {len(items)} article links.")
+        yield _status(0, "complete", "success", len(items), config, "Source ready to add.")
+        return
+    yield _status(6, "Firecrawl", "failed", 0, None,
+                  "Firecrawl returned 0 items.")
+
+    # ── Strategy 7: Claude Haiku direct extraction ────────────
+    yield _status(7, "Claude Haiku extraction", "running", 0, None,
                   "Trying Claude Haiku direct extraction (~$0.0002)...")
     try:
         from scrapers.claude_scraper import _extract_with_claude
@@ -259,15 +336,15 @@ async def analyze_url(
 
     if items:
         config = {"scrape_type": "html", "rss_url": None, "css_selector": None, "language": "en"}
-        yield _status(4, "Claude Haiku extraction", "success", len(items), config,
+        yield _status(7, "Claude Haiku extraction", "success", len(items), config,
                       f"Claude Haiku extracted {len(items)} articles. Will re-extract each scrape run.")
         yield _status(0, "complete", "success", len(items), config, "Source ready to add.")
         return
-    yield _status(4, "Claude Haiku extraction", "failed", 0, None,
+    yield _status(7, "Claude Haiku extraction", "failed", 0, None,
                   "Haiku returned 0 items.")
 
-    # ── Strategy 5: Apify web-scraper ────────────────────────
-    yield _status(5, "Apify web-scraper", "running", 0, None,
+    # ── Strategy 8: Apify web-scraper ────────────────────────
+    yield _status(8, "Apify web-scraper", "running", 0, None,
                   "Trying Apify web-scraper (~$0.05, last resort)...")
     try:
         items = await loop.run_in_executor(None, _test_apify, url)
@@ -277,12 +354,12 @@ async def analyze_url(
 
     if items:
         config = {"scrape_type": "apify", "rss_url": None, "css_selector": None, "language": "en"}
-        yield _status(5, "Apify web-scraper", "success", len(items), config,
+        yield _status(8, "Apify web-scraper", "success", len(items), config,
                       f"Apify succeeded — {len(items)} articles.")
         yield _status(0, "complete", "success", len(items), config, "Source ready to add.")
         return
-    yield _status(5, "Apify web-scraper", "failed", 0, None,
+    yield _status(8, "Apify web-scraper", "failed", 0, None,
                   "Apify returned 0 items.")
 
     yield _status(0, "complete", "failed", 0, None,
-                  "All 5 strategies failed. This site may be behind a hard paywall or aggressive bot-blocking.")
+                  "All 8 strategies failed. This site may be behind a hard paywall or aggressive bot-blocking.")

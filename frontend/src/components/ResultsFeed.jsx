@@ -5,6 +5,22 @@ const PLATFORM_ICONS = {
   reddit: '🟠', twitter: '🐦', instagram: '📸', linkedin: '💼', facebook: '📘',
 }
 
+const LANG_FLAGS = {
+  nl: '🇳🇱', de: '🇩🇪', fr: '🇫🇷', zh: '🇨🇳', hi: '🇮🇳',
+  es: '🇪🇸', pt: '🇧🇷', ja: '🇯🇵', ar: '🇸🇦', ko: '🇰🇷',
+  da: '🇩🇰', sv: '🇸🇪', no: '🇳🇴', fi: '🇫🇮', it: '🇮🇹',
+  ru: '🇷🇺', pl: '🇵🇱', tr: '🇹🇷', id: '🇮🇩', th: '🇹🇭',
+}
+
+function LanguageBadge({ lang }) {
+  if (!lang || lang === 'en') return null
+  return (
+    <span className="text-xs text-gray-400 flex items-center gap-0.5">
+      {LANG_FLAGS[lang] || '🌐'} Translated
+    </span>
+  )
+}
+
 const TAG_COLORS = {
   ToBRFV: 'bg-red-100 text-red-700',
   TYLCV: 'bg-orange-100 text-orange-700',
@@ -50,6 +66,7 @@ function ResultCard({ item, isNew }) {
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {(ii?.tags || []).slice(0, 5).map(t => <TagBadge key={t} tag={t} />)}
             <span className="text-xs text-gray-400">{formatDate(si)}</span>
+            <LanguageBadge lang={ii?.original_language} />
             {score && (
               <span className="flex items-center gap-1 text-xs text-gray-500">
                 <span className={`w-2 h-2 rounded-full ${scoreColor}`} />{score}/10
@@ -81,6 +98,7 @@ function AlertCard({ item, isNew }) {
           <div className="flex items-center gap-2 mb-1">
             <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${urgencyBadge}`}>{urgencyLabel}</span>
             <span className="text-xs text-gray-400">{formatDate(si)}</span>
+            <LanguageBadge lang={ii?.original_language} />
             {isNew && <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">new</span>}
           </div>
           <a href={si?.url} target="_blank" rel="noopener noreferrer"
@@ -118,6 +136,7 @@ function DataCard({ item, isNew }) {
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
           {(ii?.tags || []).slice(0, 6).map(t => <TagBadge key={t} tag={t} />)}
           <span className="text-xs text-gray-400 ml-1">{formatDate(si)}</span>
+          <LanguageBadge lang={ii?.original_language} />
         </div>
       </div>
       <div className="shrink-0 w-16 flex flex-col items-end gap-1">
@@ -152,7 +171,7 @@ export default function ResultsFeed({ profile, cardStyle = 'article', followedSo
         id, is_new,
         scraped_items!inner (
           id, title, url, content, published_at, scraped_at, platform, language, source_id,
-          interpreted_items (title_en, summary_en, relevance_score, tags)
+          interpreted_items (title_en, summary_en, relevance_score, tags, original_language)
         )
       `)
       .eq('search_profile_id', profile.id)

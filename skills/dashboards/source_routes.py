@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from loguru import logger
 
-from core.dependencies import get_current_user
+from core.dependencies import get_current_user, get_current_user_optional
 from supabase_service.source_service import (
     get_user_source_prefs,
     upsert_source_pref,
@@ -64,10 +64,11 @@ def list_sources_for_category(category_id: str, current_user=Depends(get_current
 # ── Submit confirmed source ───────────────────────────────────────────────────
 
 @router.post("/submit")
-def submit_source(body: SubmitSourceRequest, current_user=Depends(get_current_user)):
+def submit_source(body: SubmitSourceRequest, current_user=Depends(get_current_user_optional)):
     existing = get_source_by_url(body.url)
     if existing:
-        upsert_source_pref(current_user["id"], existing["id"], True)
+        if current_user["id"]:
+            upsert_source_pref(current_user["id"], existing["id"], True)
         return {
             "source_id": existing["id"],
             "created": False,
@@ -83,7 +84,7 @@ def submit_source(body: SubmitSourceRequest, current_user=Depends(get_current_us
         "css_selector": body.css_selector,
         "language": body.language,
         "active": True,
-        "submitted_by": current_user["id"],
+        "submitted_by": current_user["id"],  # None for demo — FK allows NULL
         "is_required": False,
     }
     source = create_source(source_row)
@@ -101,7 +102,7 @@ def submit_source(body: SubmitSourceRequest, current_user=Depends(get_current_us
 async def analyze_source_stream(
     url: str,
     category_slug: str = "news",
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_current_user_optional),
 ):
     """
     GET /sources/analyze?url=...&category_slug=...
