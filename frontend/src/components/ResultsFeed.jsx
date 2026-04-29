@@ -51,7 +51,7 @@ function ResultCard({ item, isNew }) {
   const ii = si?.interpreted_items
   const title = ii?.title_en || si?.title || '(no title)'
   const summary = ii?.summary_en || si?.content?.slice(0, 220) || ''
-  const lang = ii?.original_language || si?.language
+  const lang = si?.language || si?.language
   const score = ii?.relevance_score
   const scoreColor = score >= 7 ? 'bg-green-500' : score >= 4 ? 'bg-yellow-500' : 'bg-gray-400'
 
@@ -100,7 +100,7 @@ function AlertCard({ item, isNew }) {
           <div className="flex items-center gap-2 mb-1">
             <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${urgencyBadge}`}>{urgencyLabel}</span>
             <span className="text-xs text-gray-400">{formatDate(si)}</span>
-            <LanguageBadge lang={ii?.original_language} />
+            <LanguageBadge lang={si?.language} />
             {isNew && <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">new</span>}
           </div>
           <a href={si?.url} target="_blank" rel="noopener noreferrer"
@@ -138,7 +138,7 @@ function DataCard({ item, isNew }) {
         <div className="flex flex-wrap items-center gap-1.5 mt-1">
           {(ii?.tags || []).slice(0, 6).map(t => <TagBadge key={t} tag={t} />)}
           <span className="text-xs text-gray-400 ml-1">{formatDate(si)}</span>
-          <LanguageBadge lang={ii?.original_language} />
+          <LanguageBadge lang={si?.language} />
         </div>
       </div>
       <div className="shrink-0 w-16 flex flex-col items-end gap-1">
@@ -157,7 +157,7 @@ const CARD_COMPONENTS = { article: ResultCard, alert: AlertCard, data: DataCard 
 // ── Main feed component ───────────────────────────────────────────────────────
 const SCRAPED_SELECT = `
   id, title, url, content, published_at, scraped_at, platform, language, source_id,
-  interpreted_items (title_en, summary_en, relevance_score, tags, original_language)
+  interpreted_items (title_en, summary_en, relevance_score, tags)
 `
 
 export default function ResultsFeed({ profile, category, cardStyle = 'article', followedSourceIds = [], userId }) {
@@ -176,7 +176,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
     let results = []
     const piQuery = supabase
       .from('profile_items')
-      .select(`id, is_new, scraped_items!inner (${SCRAPED_SELECT})`)
+      .select(`id, is_new, matched_at, scraped_items!inner (${SCRAPED_SELECT})`)
       .eq('search_profile_id', profile.id)
     const { data: piData } = await (filter === 'new' ? piQuery.eq('is_new', true) : piQuery)
       .order('matched_at', { ascending: false })
