@@ -144,11 +144,14 @@ export default function SearchProfiles({ category, selectedProfile, onProfileSel
   const [showForm, setShowForm] = useState(false)
   const [editingProfile, setEditingProfile] = useState(null)
 
-  useEffect(() => { if (category) loadProfiles() }, [category])
+  useEffect(() => { if (category) loadProfiles(true) }, [category])
 
-  const loadProfiles = async () => {
+  const loadProfiles = async (autoSelect = false) => {
     const { data } = await supabase.from('search_profiles').select('*').eq('category_id', category.id).order('created_at', { ascending: false })
     setProfiles(data || [])
+    if (autoSelect && data?.length > 0) {
+      onProfileSelect(data[0])
+    }
   }
 
   const handleDelete = async (id) => {
