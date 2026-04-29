@@ -22,7 +22,7 @@ from db.client import supabase
 
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
 MODEL = "claude-haiku-4-5-20251001"
-BATCH_SIZE = 20
+BATCH_SIZE = 10
 
 
 def get_unprocessed(limit: int = 100) -> list[dict]:
@@ -80,7 +80,7 @@ def interpret_batch(items: list[dict], client: anthropic.Anthropic) -> list[dict
     try:
         response = client.messages.create(
             model=MODEL,
-            max_tokens=3000,
+            max_tokens=4000,
             messages=[{"role": "user", "content": prompt}]
         )
         output = response.content[0].text.strip()
@@ -131,7 +131,6 @@ def save_interpretations(interpretations: list[dict], source_items: list[dict], 
             "relevance_score": interp.get("relevance_score", 5),
             "tags": interp.get("tags", []),
             "category_slug": interp.get("category_slug", ""),
-            "original_language": original_language,
         }
 
         try:
