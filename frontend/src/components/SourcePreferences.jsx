@@ -98,10 +98,12 @@ export default function SourcePreferences({
   }
 
   const handleToggleFollow = async (sourceId, follow) => {
-    await supabase.from('user_source_prefs').upsert(
-      { user_id: userId, source_id: sourceId, is_followed: follow, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,source_id' }
-    )
+    if (userId) {
+      await supabase.from('user_source_prefs').upsert(
+        { user_id: userId, source_id: sourceId, is_followed: follow, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id,source_id' }
+      )
+    }
     onPrefChange(sourceId, follow)
   }
 

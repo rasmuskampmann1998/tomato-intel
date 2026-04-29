@@ -26,6 +26,31 @@ LINKEDIN_TARGET_COMPANIES = [
     "HortiDaily", "Seed World"
 ]
 
+# Core "tomato" translations for building non-English search queries
+TOMATO_TRANSLATIONS = {
+    "zh": "番茄",
+    "ja": "トマト",
+    "hi": "टमाटर",
+    "es": "tomate",
+    "ar": "طماطم",
+    "tr": "domates",
+    "nl": "tomaat",
+    "da": "tomat",
+    "de": "Tomate",
+    "fr": "tomate",
+}
+
+
+def _localise_terms(search_terms: list[str], lang: str) -> list[str]:
+    """Replace 'tomato' (case-insensitive) in each term with the target-language word."""
+    if lang == "en" or lang not in TOMATO_TRANSLATIONS:
+        return search_terms
+    local_word = TOMATO_TRANSLATIONS[lang]
+    localised = []
+    for term in search_terms:
+        localised.append(term.lower().replace("tomato", local_word))
+    return localised
+
 
 # ──────────────────────────────────────────────
 # REDDIT — Direct PRAW (no LangChain wrapper)
@@ -233,58 +258,173 @@ def scrape_instagram(search_terms: list[str]) -> list[dict]:
 # LINKEDIN — Apify (replaces broken Selenium)
 # ──────────────────────────────────────────────
 
-def scrape_linkedin(search_terms: list[str]) -> list[dict]:
+def scrape_linkedin(search_terms: list[str], languages: list[str] = None) -> list[dict]:
     """
     Scrape LinkedIn posts via Apify.
-    Replaces utils/linkedin_fetcher.py which used Selenium (too fragile).
+    Sends one query per language using localised search terms.
     """
     if not APIFY_TOKEN:
         logger.warning("[LinkedIn] No Apify token — skipping")
         return []
 
+    langs = languages or ["en"]
     all_items = []
 
-    for term in search_terms:
+    for lang in langs:
+        localised = _localise_terms(search_terms, lang)
+        for term in localised:
+            try:
+                client = ApifyClient(APIFY_TOKEN)
+                run_input = {
+                    "keywords": term,
+                    "datePosted": "past-week",
+                    "maxResults": 20,
+                    "proxyConfiguration": {"useApifyProxy": True},
+                }
+
+                run = client.actor("apify/linkedin-post-search-scraper").call(run_input=run_input)
+                results = list(client.dataset(run["defaultDatasetId"]).iterate_items())
+
+                for r in results:
+                    url = r.get("postUrl", r.get("url", ""))
+                    text = r.get("text", r.get("content", ""))
+                    if not url or not text:
+                        continue
+                    all_items.append({
+                        "source_name": "LinkedIn",
+                        "category_slug": "social",
+                        "title": text[:120],
+                        "url": url,
+                        "content": text,
+                        "language": lang,
+                        "published_at": r.get("publishedAt", r.get("postedDate")),
+                        "platform": "linkedin",
+                        "author": r.get("authorName", r.get("author_name", "")),
+                        "like_count": r.get("likeCount", r.get("total_reactions", 0)),
+                        "comment_count": r.get("commentCount", r.get("comments", 0)),
+                        "share_count": r.get("shareCount", r.get("shares", 0)),
+                        "view_count": None,
+                        "post_type": "post",
+                    })
+
+                logger.info(f"[LinkedIn] '{term}' ({lang}): {len(results)} posts")
+
+            except Exception as e:
+                logger.error(f"[LinkedIn] Apify scrape failed for '{term}' ({lang}): {e}")
+
+    return all_items
+
+
+def scrape_facebook(search_terms: list[str], languages: list[str] = None) -> list[dict]:
+    """
+    Scrape Facebook posts via Apify apify/facebook-posts-scraper.
+    Sends localised queries per language.
+    """
+    if not APIFY_TOKEN:
+        logger.warning("[Facebook] No Apify token — skipping")
+        return []
+
+    langs = languages or ["en"]
+    all_items = []
+
+    for lang in langs:
+        localised = _localise_terms(search_terms, lang)
+        query = " OR ".join(localised[:3])  # combine top 3 terms as OR query
         try:
             client = ApifyClient(APIFY_TOKEN)
             run_input = {
-                "keywords": term,
-                "datePosted": "past-week",
-                "maxResults": 25,
-                "proxyConfiguration": {"useApifyProxy": True},
+                "searchQueries": [query],
+                "maxPostsPerQuery": 20,
+                "onlyPostsNewerThan": "7 days",
             }
 
-            run = client.actor("apify/linkedin-post-search-scraper").call(run_input=run_input)
+            run = client.actor("apify/facebook-posts-scraper").call(run_input=run_input)
             results = list(client.dataset(run["defaultDatasetId"]).iterate_items())
 
             for r in results:
-                url = r.get("postUrl", r.get("url", ""))
-                text = r.get("text", r.get("content", ""))
-                if not url or not text:
+                url = r.get("url", r.get("postUrl", ""))
+                text = r.get("text", r.get("message", ""))
+                if not url:
                     continue
                 all_items.append({
-                    "source_name": "LinkedIn",
+                    "source_name": "Facebook",
                     "category_slug": "social",
-                    "title": text[:120],
+                    "title": text[:120] if text else f"Facebook post ({lang})",
                     "url": url,
                     "content": text,
-                    "language": "en",
-                    "published_at": r.get("publishedAt", r.get("postedDate")),
-                    "platform": "linkedin",
-                    "author": r.get("authorName", r.get("author_name", "")),
-                    "like_count": r.get("likeCount", r.get("total_reactions", 0)),
-                    "comment_count": r.get("commentCount", r.get("comments", 0)),
-                    "share_count": r.get("shareCount", r.get("shares", 0)),
+                    "language": lang,
+                    "published_at": r.get("time", r.get("timestamp")),
+                    "platform": "facebook",
+                    "author": r.get("pageName", r.get("userName", "")),
+                    "like_count": r.get("likes", 0),
+                    "comment_count": r.get("comments", 0),
+                    "share_count": r.get("shares", 0),
                     "view_count": None,
                     "post_type": "post",
                 })
 
-            logger.info(f"[LinkedIn] '{term}': {len(results)} posts")
+            logger.info(f"[Facebook] '{query}' ({lang}): {len(results)} posts")
 
         except Exception as e:
-            logger.error(f"[LinkedIn] Apify scrape failed for '{term}': {e}")
+            logger.error(f"[Facebook] Apify scrape failed ({lang}): {e}")
 
     return all_items
+
+
+def scrape_tiktok(search_terms: list[str], languages: list[str] = None) -> list[dict]:
+    """
+    Scrape TikTok posts via Apify clockworks/free-tiktok-scraper.
+    Sends one keyword per language.
+    """
+    if not APIFY_TOKEN:
+        logger.warning("[TikTok] No Apify token — skipping")
+        return []
+
+    langs = languages or ["en"]
+    all_items = []
+
+    for lang in langs:
+        localised = _localise_terms(search_terms, lang)
+        for term in localised[:2]:  # cap to 2 terms per language to limit Apify cost
+            try:
+                client = ApifyClient(APIFY_TOKEN)
+                run_input = {
+                    "hashtags": [term.replace(" ", "")],
+                    "resultsPerPage": 20,
+                    "scrapeType": "search",
+                    "searchQueries": [term],
+                    "maxResults": 20,
+                }
+
+                run = client.actor("clockworks/free-tiktok-scraper").call(run_input=run_input)
+                results = list(client.dataset(run["defaultDatasetId"]).iterate_items())
+
+                for r in results:
+                    url = r.get("webVideoUrl", r.get("url", ""))
+                    text = r.get("text", r.get("desc", ""))
+                    if not url:
+                        continue
+                    all_items.append({
+                        "source_name": "TikTok",
+                        "category_slug": "social",
+                        "title": text[:120] if text else f"TikTok video ({lang})",
+                        "url": url,
+                        "content": text,
+                        "language": lang,
+                        "published_at": r.get("createTimeISO", r.get("createTime")),
+                        "platform": "tiktok",
+                        "author": r.get("authorMeta", {}).get("name", r.get("author", "")),
+                        "like_count": r.get("diggCount", r.get("stats", {}).get("diggCount", 0)),
+                        "comment_count": r.get("commentCount", r.get("stats", {}).get("commentCount", 0)),
+                        "share_count": r.get("shareCount", r.get("stats", {}).get("shareCount", 0)),
+                        "view_count": r.get("playCount", r.get("stats", {}).get("playCount", 0)),
+                        "post_type": "video",
+                    })
+
+                logger.info(f"[TikTok] '{term}' ({lang}): {len(results)} videos")
+
+            except Exception as e:
+                logger.error(f"[TikTok] Apify scrape failed for '{term}' ({lang}): {e}")
 
 
 # ──────────────────────────────────────────────
@@ -299,18 +439,23 @@ def run_social_scrape(
 ) -> list[dict]:
     """Run all enabled social media scrapers and return combined results."""
     if platforms is None:
-        platforms = ["reddit", "twitter", "instagram", "linkedin"]
+        platforms = ["reddit", "twitter", "instagram", "linkedin", "facebook", "tiktok"]
 
     all_items = []
 
     if "reddit" in platforms:
+        # Reddit PRAW is English-only (no official non-English subreddit coverage)
         all_items.extend(scrape_reddit(search_terms, time_filter=time_filter))
     if "twitter" in platforms:
         all_items.extend(scrape_twitter(search_terms, languages))
     if "instagram" in platforms:
         all_items.extend(scrape_instagram(search_terms))
     if "linkedin" in platforms:
-        all_items.extend(scrape_linkedin(search_terms))
+        all_items.extend(scrape_linkedin(search_terms, languages))
+    if "facebook" in platforms:
+        all_items.extend(scrape_facebook(search_terms, languages))
+    if "tiktok" in platforms:
+        all_items.extend(scrape_tiktok(search_terms, languages))
 
     logger.info(f"[Social] Total: {len(all_items)} items across {len(platforms)} platforms")
     return all_items

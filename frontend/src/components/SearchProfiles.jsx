@@ -2,7 +2,7 @@
 import { supabase } from '../lib/supabase'
 
 const FREQ_OPTIONS = ['daily', 'weekly', 'monthly']
-const LANG_OPTIONS = ['en', 'nl', 'da', 'de', 'es', 'zh', 'hi', 'fr']
+const LANG_OPTIONS = ['en', 'zh', 'ja', 'hi', 'es', 'ar', 'tr', 'nl', 'da', 'de', 'fr']
 
 function ProfileCard({ profile, selected, onSelect, onEdit, onDelete }) {
   return (
@@ -62,9 +62,9 @@ function ProfileForm({ categoryId, profile, onSave, onCancel }) {
     const searchTerms = terms.split(',').map(t => t.trim()).filter(Boolean)
     if (!searchTerms.length) return
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
     const row = {
-      user_id: user.id,
+      user_id: session?.user?.id ?? null,
       category_id: categoryId,
       name: name || searchTerms.join(', '),
       search_terms: searchTerms,

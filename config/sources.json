@@ -5,7 +5,7 @@
         {
           "name": "Hortidaily",
           "url": "https://www.hortidaily.com",
-          "rss_url": "https://www.hortidaily.com/feed/",
+          "rss_url": null,
           "scrape_type": "html",
           "css_selector": "a[href*='/article/']",
           "fetch_content": true,
@@ -18,15 +18,18 @@
           "rss_url": "https://www.mdpi.com/rss/journal/horticulturae",
           "scrape_type": "rss",
           "language": "en",
-          "is_required": true
+          "is_required": true,
+          "_note": "403 on direct fetch — handled by crossref_scraper via ISSN 2311-7524"
         },
         {
           "name": "Oxford Academic — Horticulture Research",
           "url": "https://academic.oup.com/hr",
-          "rss_url": "https://academic.oup.com/rss/site_5295/advanceAccess_5295.xml",
-          "scrape_type": "rss",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/article/']",
           "language": "en",
-          "is_required": true
+          "is_required": true,
+          "_note": "RSS 404. HTML 403 on bot detection — handled by crossref_scraper (ISSN 2052-7276)"
         },
         {
           "name": "The Conversation — Agriculture",
@@ -39,10 +42,12 @@
         {
           "name": "AP News Agriculture",
           "url": "https://apnews.com/hub/agriculture",
-          "rss_url": "https://feeds.ap.org/rss/apf-agriculture",
-          "scrape_type": "rss",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/article/']",
           "language": "en",
-          "is_required": true
+          "is_required": true,
+          "_note": "RSS SSL error. HTML scrape instead."
         },
         {
           "name": "Seed World",
@@ -55,24 +60,26 @@
         {
           "name": "Horticulture Advances",
           "url": "https://academic.oup.com/horticultureadvances",
-          "rss_url": "https://academic.oup.com/rss/site_6714/advanceAccess_6714.xml",
-          "scrape_type": "rss",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/article/']",
           "language": "en",
-          "is_required": false
+          "is_required": false,
+          "_note": "RSS 404. Handled by crossref_scraper."
         },
         {
           "name": "HortiAdvisor",
           "url": "https://www.hortiadvisor.com",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": ".news-item h3 a",
+          "css_selector": ".news-item h3 a, article h2 a",
           "language": "en",
           "is_required": false
         },
         {
           "name": "GFActueel.nl",
           "url": "https://www.gfactueel.nl",
-          "rss_url": "https://www.gfactueel.nl/rss/nieuws/",
+          "rss_url": "https://www.gfactueel.nl/feed/",
           "scrape_type": "rss",
           "language": "nl",
           "is_required": true
@@ -82,7 +89,7 @@
           "url": "https://www.greentech.nl",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": ".article-teaser h3 a",
+          "css_selector": ".article-teaser h3 a, a[href*='/news/']",
           "language": "nl",
           "is_required": true
         },
@@ -92,14 +99,15 @@
           "rss_url": "https://www.gartnertidende.dk/feed",
           "scrape_type": "rss",
           "language": "da",
-          "is_required": false
+          "is_required": false,
+          "_note": "Feed returns 0 entries — print magazine, limited web content"
         },
         {
           "name": "Veggies from Mexico",
           "url": "https://www.veggiesfrommexico.com",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": "article h2 a",
+          "css_selector": "a[href*='/news/'], a[href*='/blog/']",
           "language": "en",
           "is_required": false
         },
@@ -108,7 +116,7 @@
           "url": "https://ahsgardening.org",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": ".post-title a",
+          "css_selector": ".post-title a, article h2 a",
           "language": "en",
           "is_required": false
         },
@@ -117,25 +125,62 @@
           "url": "https://revistas.chapingo.mx/horticultura/",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": ".article-title a",
+          "css_selector": "a[href*='/issue/'], a[href*='/article/'], .article-title a",
           "language": "es",
           "is_required": false
         },
         {
           "name": "HortiWeek UK",
-          "url": "https://www.hortweek.com",
-          "rss_url": "https://www.hortweek.com/rss/",
-          "scrape_type": "rss",
+          "url": "https://www.hortweek.com/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/horticulture/article/'], a[href*='/news/']",
+          "language": "en",
+          "is_required": false,
+          "_note": "RSS 404. Most articles behind login, but headlines accessible."
+        },
+        {
+          "name": "Krishijagran (Indian Agriculture)",
+          "url": "https://krishijagran.com/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/news/'], h3 a, h2 a",
           "language": "en",
           "is_required": false
         },
         {
-          "name": "Krishijagran (Indian Agriculture)",
-          "url": "https://krishijagran.com",
-          "rss_url": "https://krishijagran.com/feed/",
+          "name": "Produce Grower",
+          "url": "https://www.producegrower.com",
+          "rss_url": "https://www.producegrower.com/rss/",
           "scrape_type": "rss",
           "language": "en",
-          "is_required": false
+          "is_required": true
+        },
+        {
+          "name": "Specialty Crop Grower",
+          "url": "https://www.specialtycropgrower.com",
+          "rss_url": "https://www.specialtycropgrower.com/feed/",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Inside Grower",
+          "url": "https://www.inside-grower.com",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h2 a, a[href*='/news/'], a[href*='/article/']",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Tomato Cultivation",
+          "url": "https://www.tomatocultivation.com",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='Tomato-Cultivation-News/'], a[href*='-news.html']",
+          "language": "en",
+          "is_required": true
         }
       ]
     },
@@ -172,7 +217,17 @@
           "rss_url": null,
           "scrape_type": "html",
           "language": "en",
-          "is_required": true
+          "is_required": true,
+          "_note": "Connection reset on direct fetch — may need Apify in production"
+        },
+        {
+          "name": "Bayer/Monsanto Vegetable Patents",
+          "url": "https://www.cropscience.bayer.com/innovations/patents",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/web-scraper",
+          "language": "en",
+          "is_required": false
         }
       ]
     },
@@ -212,6 +267,24 @@
           "apify_actor": "apify/linkedin-post-search-scraper",
           "language": "en",
           "is_required": true
+        },
+        {
+          "name": "Facebook",
+          "url": "https://www.facebook.com",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/facebook-posts-scraper",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "TikTok",
+          "url": "https://www.tiktok.com",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "clockworks/free-tiktok-scraper",
+          "language": "en",
+          "is_required": true
         }
       ]
     },
@@ -222,16 +295,17 @@
           "url": "https://www.rijkzwaan.com/press-releases",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": "article h3 a",
+          "css_selector": "article h3 a, a[href*='/press-release']",
           "language": "en",
-          "is_required": true
+          "is_required": true,
+          "_note": "403 on plain HTTP — needs Playwright/ZenRows in production"
         },
         {
           "name": "Enza Zaden",
           "url": "https://www.enzazaden.com/news",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": ".news-item h3 a",
+          "css_selector": "a[href*='/news/'], .news-item h3 a",
           "language": "en",
           "is_required": true
         },
@@ -246,21 +320,50 @@
         },
         {
           "name": "Bejo Seeds",
-          "url": "https://www.bejo.com/news",
+          "url": "https://www.bejo.com/news-and-events",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": ".news-card h3 a",
+          "css_selector": "a[href*='/news-and-events/'], .news-card h3 a",
           "language": "en",
-          "is_required": false
+          "is_required": false,
+          "_note": "URL fixed from /news (404) to /news-and-events"
         },
         {
           "name": "De Ruiter Seeds",
           "url": "https://www.deruiterseeds.com/news",
           "rss_url": null,
           "scrape_type": "html",
-          "css_selector": "article h3 a",
+          "css_selector": "article h3 a, a[href*='/news/']",
           "language": "en",
-          "is_required": false
+          "is_required": false,
+          "_note": "403 on plain HTTP — needs Playwright/ZenRows in production"
+        },
+        {
+          "name": "Bayer Vegetable Seeds",
+          "url": "https://www.vegetables.bayer.com",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/web-scraper",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "AXIA Seeds",
+          "url": "https://axiaseeds.com",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h2 a, .news-item h3 a, a[href*='/news/']",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "Harmoniz Seeds",
+          "url": "https://www.harmonizseed.com",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h2 a, a[href*='/news/']",
+          "language": "en",
+          "is_required": true
         }
       ]
     },
@@ -271,8 +374,96 @@
           "url": "https://npgsweb.ars-grin.gov/gringlobal/search",
           "rss_url": null,
           "scrape_type": "html",
+          "css_selector": "a[href*='accessiondetail'], a[href*='taxon']",
           "language": "en",
           "is_required": true
+        },
+        {
+          "name": "INRAE — French Genetics Research",
+          "url": "https://eng-gafl.paca.hub.inrae.fr",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h2 a, .news h3 a, a[href*='/news/']",
+          "language": "fr",
+          "is_required": true
+        },
+        {
+          "name": "Wageningen Tomato Genome",
+          "url": "https://www.tomatogenome.wur.nl",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/news/'], article h2 a",
+          "language": "en",
+          "is_required": true,
+          "_note": "SSL cert expired — scraper must use verify=False"
+        },
+        {
+          "name": "TomatoLab",
+          "url": "https://www.tomatolab.net",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/page/'], a.nav-item-page",
+          "language": "en",
+          "is_required": true,
+          "_note": "Static informational site — mostly page-level links, no news feed"
+        },
+        {
+          "name": "Newbreed Plant Breeding",
+          "url": "https://www.newbreed.nl",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/web-scraper",
+          "language": "nl",
+          "is_required": false,
+          "_note": "JS-rendered (SSL cert issue + 0 links on plain fetch) — needs Apify"
+        },
+        {
+          "name": "ResearchGate — Tomato",
+          "url": "https://www.researchgate.net/search?q=tomato+breeding",
+          "rss_url": null,
+          "scrape_type": "apify",
+          "apify_actor": "apify/web-scraper",
+          "language": "en",
+          "is_required": false
+        },
+        {
+          "name": "Nature — Tomato Research",
+          "url": "https://www.nature.com/search?q=tomato+seed+breeding&order=relevance",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/articles/']",
+          "language": "en",
+          "is_required": true,
+          "_note": "RSS 404. HTML search returns 50+ article links."
+        },
+        {
+          "name": "TGRC — Tomato Genetics Resource Center",
+          "url": "https://tgrc.ucdavis.edu",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "article h2 a, .news-item a",
+          "language": "en",
+          "is_required": true,
+          "_note": "403 on plain HTTP — needs Playwright/ZenRows in production"
+        },
+        {
+          "name": "CPVO — Community Plant Variety Office",
+          "url": "https://cpvo.europa.eu",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/news/'], a[href*='/news-and-events/'], .news-item h3 a",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "USDA AMS — News",
+          "url": "https://www.ams.usda.gov/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/news/']",
+          "language": "en",
+          "is_required": true,
+          "_note": "URL fixed from /plant-varieties (404) to /news"
         }
       ]
     },
@@ -283,6 +474,7 @@
           "url": "https://food.ec.europa.eu/plants/plant-health-and-biosecurity_en",
           "rss_url": null,
           "scrape_type": "html",
+          "css_selector": "a[href*='/news/'], a[href*='/press-release/'], a[href*='_en']",
           "language": "en",
           "is_required": true
         },
@@ -292,6 +484,26 @@
           "rss_url": "https://www.aphis.usda.gov/aphis/newsroom/rss/ct_rss_news",
           "scrape_type": "rss",
           "language": "en",
+          "is_required": true,
+          "_note": "RSS and HTML timeout from Windows dev machine — may work on Railway Linux"
+        },
+        {
+          "name": "ASTA — American Seed Trade Association",
+          "url": "https://www.americanseed.org/news",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/news/'], .news-item h3 a, article h2 a",
+          "language": "en",
+          "is_required": true,
+          "_note": "DNS failure from Windows dev — may resolve on Railway"
+        },
+        {
+          "name": "China MARA — Ministry of Agriculture",
+          "url": "https://english.moa.gov.cn",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": ".news-list li a, a[href*='/news/']",
+          "language": "zh",
           "is_required": true
         }
       ]
@@ -304,7 +516,26 @@
           "rss_url": "https://www.mdpi.com/rss/journal/agronomy",
           "scrape_type": "rss",
           "language": "en",
-          "is_required": false
+          "is_required": false,
+          "_note": "403 on direct fetch — handled by crossref_scraper via ISSN 2073-4395"
+        },
+        {
+          "name": "Seed Alliance",
+          "url": "https://seedalliance.org",
+          "rss_url": "https://seedalliance.org/feed/",
+          "scrape_type": "rss",
+          "language": "en",
+          "is_required": true
+        },
+        {
+          "name": "IntelForAg",
+          "url": "https://intelforag.org",
+          "rss_url": null,
+          "scrape_type": "html",
+          "css_selector": "a[href*='/deriving-'], a[href*='/market-'], a[href*='/land-'], a[href*='/sustainable-']",
+          "language": "en",
+          "is_required": true,
+          "_note": "Consulting site with resource pages — no news feed, only service pages"
         }
       ]
     }

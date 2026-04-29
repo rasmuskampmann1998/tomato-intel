@@ -31,6 +31,7 @@ from scrapers.patent_epo import search_epo
 from scrapers.patent_uspto import search_uspto
 from scrapers.patent_cnipa import search_cnipa, search_ip_india
 from scrapers.social_scraper import run_social_scrape
+from scrapers.serp_scraper import run_search_discovery_for_category, CATEGORY_DEFAULTS
 
 CONFIG_PATH = Path(__file__).parent.parent / "config" / "sources.json"
 
@@ -118,12 +119,94 @@ def update_source_status(source_id: str, status: str):
         logger.warning(f"Could not update source status: {e}")
 
 
+def load_global_search_profiles() -> list[dict]:
+    """
+    Load demo/global search profiles (user_id IS NULL) from Supabase.
+    These are seeded by fix_rls_and_seed.sql and define per-category search terms + languages.
+    Falls back to CATEGORY_DEFAULTS if DB returns nothing (e.g. RLS fix not yet applied).
+    """
+    try:
+        resp = (
+            supabase.table("search_profiles")
+            .select("*, categories(slug)")
+            .is_("user_id", "null")
+            .execute()
+        )
+        profiles = resp.data or []
+        if profiles:
+            # Flatten category slug
+            for p in profiles:
+                if p.get("categories"):
+                    p["category_slug"] = p["categories"]["slug"]
+            return profiles
+    except Exception as e:
+        logger.warning(f"Could not load global search profiles ({e}), using defaults")
+    return []
+
+
+def run_search_discovery(categories_filter: list[str] = None, dry_run: bool = False) -> int:
+    """
+    Run SerpAPI Google News search discovery for all categories.
+    Uses global search_profiles (user_id=NULL) from DB; falls back to CATEGORY_DEFAULTS.
+    Runs in parallel with URL scraping — results saved to scraped_items with source_id=NULL.
+    Returns total items saved.
+    """
+    profiles = load_global_search_profiles()
+    total = 0
+
+    # Build per-category (terms, languages) from DB profiles
+    profile_map: dict[str, tuple[list, list]] = {}
+    for p in profiles:
+        slug = p.get("category_slug", "")
+        if not slug:
+            continue
+        terms = p.get("search_terms", [])
+        langs = p.get("languages", ["en"])
+        if slug not in profile_map:
+            profile_map[slug] = (terms, langs)
+        else:
+            # Merge terms/langs from multiple profiles per category
+            existing_terms, existing_langs = profile_map[slug]
+            merged_terms = list(dict.fromkeys(existing_terms + terms))
+            merged_langs = list(dict.fromkeys(existing_langs + langs))
+            profile_map[slug] = (merged_terms, merged_langs)
+
+    # Fall back to hardcoded defaults for any category not in DB
+    for slug, (default_terms, default_langs) in CATEGORY_DEFAULTS.items():
+        if slug not in profile_map:
+            profile_map[slug] = (default_terms, default_langs)
+
+    # Apply category filter
+    if categories_filter:
+        profile_map = {k: v for k, v in profile_map.items() if k in categories_filter}
+
+    logger.info(f"[SearchDiscovery] Running for {len(profile_map)} categories")
+
+    for slug, (terms, langs) in profile_map.items():
+        logger.info(f"[SearchDiscovery] {slug}: {len(terms)} terms × {len(langs)} languages")
+        items = run_search_discovery_for_category(slug, terms, langs, dry_run=dry_run)
+        if not dry_run:
+            saved = save_items(items, dry_run)
+            total += saved
+            logger.info(f"[SearchDiscovery] {slug}: saved {saved} new items")
+        else:
+            total += len(items)
+
+    return total
+
+
 def run_category(category_slug: str, sources: list[dict], search_terms: list[str], dry_run: bool) -> int:
     """Run all scrapers for a category. Returns total items saved."""
     total = 0
 
     if category_slug == "social":
-        items = run_social_scrape(search_terms)
+        # Pass languages from global search profile so Apify actors get non-English queries too
+        social_profile = load_global_search_profiles()
+        social_langs = next(
+            (p.get("languages", ["en"]) for p in social_profile if p.get("category_slug") == "social"),
+            CATEGORY_DEFAULTS.get("social", ([], ["en"]))[1],
+        )
+        items = run_social_scrape(search_terms, languages=social_langs)
         total += save_items(items, dry_run)
         return total
 
@@ -242,6 +325,7 @@ def main():
     parser.add_argument("--categories", help="Comma-separated category slugs (e.g. news,patents)")
     parser.add_argument("--dry-run", action="store_true", help="Print items, don't save to DB")
     parser.add_argument("--search-terms", help="Override default search terms (comma-separated)")
+    parser.add_argument("--no-search-discovery", action="store_true", help="Skip SerpAPI search discovery")
     args = parser.parse_args()
 
     categories_filter = [c.strip() for c in args.categories.split(",")] if args.categories else None
@@ -269,6 +353,13 @@ def main():
         total = run_category(slug, sources, search_terms, dry_run)
         grand_total += total
         logger.info(f"Category {slug}: {total} items")
+
+    # Phase 2: SerpAPI multi-language search discovery (runs after URL scraping)
+    if not args.no_search_discovery:
+        logger.info("--- Search Discovery (SerpAPI multi-language) ---")
+        discovery_total = run_search_discovery(categories_filter, dry_run)
+        grand_total += discovery_total
+        logger.info(f"Search discovery: {discovery_total} items")
 
     trigger_profile_matching(dry_run)
     logger.info(f"Done. Total items saved: {grand_total}")
