@@ -138,6 +138,7 @@ export default function Dashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
                   <ResultsFeed
                     profile={selectedProfile}
+                    category={selectedCategory}
                     cardStyle={expConfig.cardStyle}
                     followedSourceIds={followedSourceIds}
                     userId={user?.id}

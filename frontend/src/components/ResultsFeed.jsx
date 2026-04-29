@@ -14,9 +14,10 @@ const LANG_FLAGS = {
 
 function LanguageBadge({ lang }) {
   if (!lang || lang === 'en') return null
+  const flag = LANG_FLAGS[lang] || '🌐'
   return (
     <span className="text-xs text-gray-400 flex items-center gap-0.5">
-      {LANG_FLAGS[lang] || '🌐'} Translated
+      {flag} {lang.toUpperCase()}
     </span>
   )
 }
@@ -49,7 +50,8 @@ function ResultCard({ item, isNew }) {
   const si = item.scraped_items
   const ii = si?.interpreted_items
   const title = ii?.title_en || si?.title || '(no title)'
-  const summary = ii?.summary_en || si?.content?.slice(0, 200) || ''
+  const summary = ii?.summary_en || si?.content?.slice(0, 220) || ''
+  const lang = ii?.original_language || si?.language
   const score = ii?.relevance_score
   const scoreColor = score >= 7 ? 'bg-green-500' : score >= 4 ? 'bg-yellow-500' : 'bg-gray-400'
 
@@ -66,7 +68,7 @@ function ResultCard({ item, isNew }) {
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {(ii?.tags || []).slice(0, 5).map(t => <TagBadge key={t} tag={t} />)}
             <span className="text-xs text-gray-400">{formatDate(si)}</span>
-            <LanguageBadge lang={ii?.original_language} />
+            <LanguageBadge lang={lang} />
             {score && (
               <span className="flex items-center gap-1 text-xs text-gray-500">
                 <span className={`w-2 h-2 rounded-full ${scoreColor}`} />{score}/10
@@ -153,7 +155,12 @@ function DataCard({ item, isNew }) {
 const CARD_COMPONENTS = { article: ResultCard, alert: AlertCard, data: DataCard }
 
 // ── Main feed component ───────────────────────────────────────────────────────
-export default function ResultsFeed({ profile, cardStyle = 'article', followedSourceIds = [], userId }) {
+const SCRAPED_SELECT = `
+  id, title, url, content, published_at, scraped_at, platform, language, source_id,
+  interpreted_items (title_en, summary_en, relevance_score, tags, original_language)
+`
+
+export default function ResultsFeed({ profile, category, cardStyle = 'article', followedSourceIds = [], userId }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('all')
@@ -165,49 +172,48 @@ export default function ResultsFeed({ profile, cardStyle = 'article', followedSo
     if (!profile) return
     setLoading(true)
 
-    let query = supabase
+    // Try profile_items first
+    let results = []
+    const piQuery = supabase
       .from('profile_items')
-      .select(`
-        id, is_new,
-        scraped_items!inner (
-          id, title, url, content, published_at, scraped_at, platform, language, source_id,
-          interpreted_items (title_en, summary_en, relevance_score, tags, original_language)
-        )
-      `)
+      .select(`id, is_new, scraped_items!inner (${SCRAPED_SELECT})`)
       .eq('search_profile_id', profile.id)
+    const { data: piData } = await (filter === 'new' ? piQuery.eq('is_new', true) : piQuery)
+      .order('matched_at', { ascending: false })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
-    if (filter === 'new') query = query.eq('is_new', true)
-    if (sortBy !== 'relevance') query = query.order('matched_at', { ascending: false })
-    query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
-
-    const { data, error } = await query
-    if (!error) {
-      let results = data || []
-
-      // Filter by followed sources if the user has prefs configured
-      if (followedSourceIds.length > 0) {
-        results = results.filter(item =>
-          followedSourceIds.includes(item.scraped_items?.source_id)
-        )
+    if (piData?.length > 0) {
+      results = piData
+      // Mark new items as seen
+      if (filter !== 'new' && piData.some(i => i.is_new)) {
+        const newIds = piData.filter(i => i.is_new).map(i => i.id)
+        await supabase.from('profile_items').update({ is_new: false }).in('id', newIds)
+        await supabase.from('search_profiles').update({ new_since_last_visit: 0 }).eq('id', profile.id)
       }
-
-      if (sortBy === 'relevance') {
-        results = results.sort((a, b) =>
-          (b.scraped_items?.interpreted_items?.relevance_score || 0) -
-          (a.scraped_items?.interpreted_items?.relevance_score || 0)
-        )
-      }
-      setItems(results)
+    } else if (category?.slug) {
+      // Fallback: query scraped_items directly by category slug
+      const { data: siData } = await supabase
+        .from('scraped_items')
+        .select(SCRAPED_SELECT)
+        .eq('category_slug', category.slug)
+        .order('scraped_at', { ascending: false })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+      results = (siData || []).map(si => ({ id: si.id, is_new: false, scraped_items: si }))
     }
+
+    if (followedSourceIds.length > 0) {
+      results = results.filter(item => followedSourceIds.includes(item.scraped_items?.source_id))
+    }
+    if (sortBy === 'relevance') {
+      results = results.sort((a, b) =>
+        (b.scraped_items?.interpreted_items?.relevance_score || 0) -
+        (a.scraped_items?.interpreted_items?.relevance_score || 0)
+      )
+    }
+
+    setItems(results)
     setLoading(false)
-
-    // Mark new items as seen
-    if (filter !== 'new' && data?.some(i => i.is_new)) {
-      const newIds = data.filter(i => i.is_new).map(i => i.id)
-      await supabase.from('profile_items').update({ is_new: false }).in('id', newIds)
-      await supabase.from('search_profiles').update({ new_since_last_visit: 0 }).eq('id', profile.id)
-    }
-  }, [profile, filter, sortBy, page, followedSourceIds])
+  }, [profile, category, filter, sortBy, page, followedSourceIds])
 
   useEffect(() => { setPage(0); setItems([]) }, [profile, filter, sortBy])
   useEffect(() => { loadItems() }, [loadItems])
