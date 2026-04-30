@@ -27,6 +27,7 @@ from scrapers.apify_scraper import scrape_apify_web, scrape_apify_content_crawle
 from scrapers.claude_scraper import scrape_claude
 from scrapers.crossref_scraper import scrape_crossref, JOURNAL_ISSNS
 from scrapers.crawl4ai_scraper import scrape_crawl4ai
+from scrapers.article_direct_scraper import scrape_article_direct
 from scrapers.article_enricher import enrich_items
 from scrapers.patent_epo import search_epo
 from scrapers.patent_uspto import search_uspto
@@ -242,6 +243,10 @@ def run_category(category_slug: str, sources: list[dict], search_terms: list[str
                 items = scrape_crossref(source)
                 if items:
                     logger.info(f"Crossref succeeded for {source['name']}: {len(items)} papers")
+
+            # Layer 0.5: article_direct — source URL is the article itself (not a listing page)
+            if not items and scrape_type == "article_direct":
+                items = scrape_article_direct(source)
 
             # Layer 1: RSS
             if not items and scrape_type == "rss":
