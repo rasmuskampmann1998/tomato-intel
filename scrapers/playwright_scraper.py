@@ -29,6 +29,7 @@ async def _scrape_with_playwright(url: str, css_selector: str, source_name: str)
                     "Chrome/124.0.0.0 Safari/537.36"
                 ),
                 viewport={"width": 1280, "height": 900},
+                ignore_https_errors=True,
             )
             page = await context.new_page()
 
