@@ -10,10 +10,11 @@ const LANG_FLAGS = {
   es: '🇪🇸', pt: '🇧🇷', ja: '🇯🇵', ar: '🇸🇦', ko: '🇰🇷',
   da: '🇩🇰', sv: '🇸🇪', no: '🇳🇴', fi: '🇫🇮', it: '🇮🇹',
   ru: '🇷🇺', pl: '🇵🇱', tr: '🇹🇷', id: '🇮🇩', th: '🇹🇭',
+  en: '🇬🇧',
 }
 
 function LanguageBadge({ lang }) {
-  if (!lang || lang === 'en') return null
+  if (!lang) return null
   const flag = LANG_FLAGS[lang] || '🌐'
   return (
     <span className="text-xs text-gray-400 flex items-center gap-0.5">
@@ -45,13 +46,79 @@ function formatDate(si) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// ── Article card (Researcher) ─────────────────────────────────────────────────
-function ResultCard({ item, isNew }) {
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function exportCSV(items, profileName) {
+  const cols = ['Title', 'Summary', 'URL', 'Date', 'Tags', 'Relevance', 'Language']
+  const rows = items.map(item => {
+    const si = item.scraped_items
+    const ii = si?.interpreted_items
+    return [
+      ii?.title_en || si?.title || '',
+      ii?.summary_en || '',
+      si?.url || '',
+      si?.published_at ? new Date(si.published_at).toLocaleDateString('en-GB') : '',
+      (ii?.tags || []).join('; '),
+      ii?.relevance_score || '',
+      si?.language || '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`)
+  })
+  const csv = [cols.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `tomato-intel-${profileName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
+function exportPDF(items, profileName) {
+  const safe = s => String(s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const rows = items.map(item => {
+    const si = item.scraped_items
+    const ii = si?.interpreted_items
+    const title = safe(ii?.title_en || si?.title || '')
+    const summary = safe(ii?.summary_en || '')
+    const tags = safe((ii?.tags || []).join(', '))
+    const date = si?.published_at ? new Date(si.published_at).toLocaleDateString('en-GB') : ''
+    const score = ii?.relevance_score ? `${ii.relevance_score}/10` : ''
+    const url = si?.url || '#'
+    return `<div style="margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #e5e7eb">
+      <a href="${url}" style="font-weight:600;color:#111827;font-size:13px;text-decoration:none">${title}</a>
+      ${summary ? `<p style="margin:5px 0 0;font-size:12px;color:#4b5563;line-height:1.5">${summary}</p>` : ''}
+      <div style="font-size:11px;color:#9ca3af;margin-top:5px">
+        ${date}${score ? ` · Relevance ${score}` : ''}${tags ? ` · ${tags}` : ''}
+      </div>
+    </div>`
+  }).join('')
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${safe(profileName)}</title>
+    <style>
+      body { font-family: -apple-system, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 24px; color: #111827 }
+      h1 { font-size: 15px; font-weight: 700; margin-bottom: 6px }
+      p.meta { font-size: 11px; color: #6b7280; margin: 0 0 28px }
+      @media print { a { color: #111827 } }
+    </style></head>
+    <body>
+      <h1>Tomato Intel — ${safe(profileName)}</h1>
+      <p class="meta">Exported ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · ${items.length} results</p>
+      ${rows}
+    </body></html>`
+
+  const w = window.open('', '_blank')
+  w.document.write(html)
+  w.document.close()
+  w.focus()
+  setTimeout(() => w.print(), 400)
+}
+
+// ── Card variants ─────────────────────────────────────────────────────────────
+
+function ResultCard({ item, isNew, showOriginal }) {
   const si = item.scraped_items
   const ii = si?.interpreted_items
-  const title = ii?.title_en || si?.title || '(no title)'
-  const summary = ii?.summary_en || si?.content?.slice(0, 220) || ''
-  const lang = si?.language || si?.language
+  const title   = showOriginal ? (si?.title || '') : (ii?.title_en || si?.title || '(no title)')
+  const summary = showOriginal ? (si?.content?.slice(0, 300) || '') : (ii?.summary_en || si?.content?.slice(0, 220) || '')
   const score = ii?.relevance_score
   const scoreColor = score >= 7 ? 'bg-green-500' : score >= 4 ? 'bg-yellow-500' : 'bg-gray-400'
 
@@ -68,7 +135,7 @@ function ResultCard({ item, isNew }) {
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {(ii?.tags || []).slice(0, 5).map(t => <TagBadge key={t} tag={t} />)}
             <span className="text-xs text-gray-400">{formatDate(si)}</span>
-            <LanguageBadge lang={lang} />
+            <LanguageBadge lang={si?.language} />
             {score && (
               <span className="flex items-center gap-1 text-xs text-gray-500">
                 <span className={`w-2 h-2 rounded-full ${scoreColor}`} />{score}/10
@@ -82,12 +149,11 @@ function ResultCard({ item, isNew }) {
   )
 }
 
-// ── Alert card (Grower) ───────────────────────────────────────────────────────
-function AlertCard({ item, isNew }) {
+function AlertCard({ item, isNew, showOriginal }) {
   const si = item.scraped_items
   const ii = si?.interpreted_items
-  const title = ii?.title_en || si?.title || '(no title)'
-  const summary = ii?.summary_en || si?.content?.slice(0, 150) || ''
+  const title   = showOriginal ? (si?.title || '') : (ii?.title_en || si?.title || '(no title)')
+  const summary = showOriginal ? (si?.content?.slice(0, 200) || '') : (ii?.summary_en || si?.content?.slice(0, 150) || '')
   const score = ii?.relevance_score || 0
   const urgencyColor = score >= 7 ? 'border-red-400 bg-red-50' : score >= 4 ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 bg-white'
   const urgencyLabel = score >= 7 ? 'High' : score >= 4 ? 'Medium' : 'Low'
@@ -119,11 +185,10 @@ function AlertCard({ item, isNew }) {
   )
 }
 
-// ── Data card (Breeder) ───────────────────────────────────────────────────────
-function DataCard({ item, isNew }) {
+function DataCard({ item, isNew, showOriginal }) {
   const si = item.scraped_items
   const ii = si?.interpreted_items
-  const title = ii?.title_en || si?.title || '(no title)'
+  const title = showOriginal ? (si?.title || '') : (ii?.title_en || si?.title || '(no title)')
   const score = ii?.relevance_score || 0
   const barWidth = `${(score / 10) * 100}%`
   const barColor = score >= 7 ? 'bg-purple-500' : score >= 4 ? 'bg-blue-400' : 'bg-gray-300'
@@ -165,6 +230,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('date')
+  const [showOriginal, setShowOriginal] = useState(false)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 25
 
@@ -172,30 +238,37 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
     if (!profile) return
     setLoading(true)
 
-    // Try profile_items first
     let results = []
-    const piQuery = supabase
+    let piQuery = supabase
       .from('profile_items')
       .select(`id, is_new, matched_at, scraped_items!inner (${SCRAPED_SELECT})`)
       .eq('search_profile_id', profile.id)
+
+    // Wire up language filter from profile
+    if (profile.languages?.length > 0) {
+      piQuery = piQuery.filter('scraped_items.language', 'in', `(${profile.languages.join(',')})`)
+    }
+
     const { data: piData } = await (filter === 'new' ? piQuery.eq('is_new', true) : piQuery)
       .order('matched_at', { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
     if (piData?.length > 0) {
       results = piData
-      // Mark new items as seen
       if (filter !== 'new' && piData.some(i => i.is_new)) {
         const newIds = piData.filter(i => i.is_new).map(i => i.id)
         await supabase.from('profile_items').update({ is_new: false }).in('id', newIds)
         await supabase.from('search_profiles').update({ new_since_last_visit: 0 }).eq('id', profile.id)
       }
     } else if (category?.slug) {
-      // Fallback: query scraped_items directly by category slug
-      const { data: siData } = await supabase
+      let siQuery = supabase
         .from('scraped_items')
         .select(SCRAPED_SELECT)
         .eq('category_slug', category.slug)
+      if (profile.languages?.length > 0) {
+        siQuery = siQuery.in('language', profile.languages)
+      }
+      const { data: siData } = await siQuery
         .order('scraped_at', { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
       results = (siData || []).map(si => ({ id: si.id, is_new: false, scraped_items: si }))
@@ -219,6 +292,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
   useEffect(() => { loadItems() }, [loadItems])
 
   const Card = CARD_COMPONENTS[cardStyle] || ResultCard
+  const profileName = profile?.name || profile?.search_terms?.join(', ') || 'export'
 
   if (!profile) {
     return (
@@ -230,11 +304,14 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="text-sm font-semibold text-gray-700">
-          Results for "{profile.name || profile.search_terms.join(', ')}"
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <h3 className="text-sm font-semibold text-gray-700 truncate max-w-[200px]">
+          "{profileName}"
         </h3>
-        <div className="flex gap-2 items-center">
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* New / All toggle */}
           <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs">
             {['all', 'new'].map(f => (
               <button key={f} onClick={() => setFilter(f)}
@@ -243,11 +320,43 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
               </button>
             ))}
           </div>
+
+          {/* Sort */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
             className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600">
             <option value="date">Sort: Date</option>
             <option value="relevance">Sort: Relevance</option>
           </select>
+
+          {/* Original / Translated toggle */}
+          <button
+            onClick={() => setShowOriginal(v => !v)}
+            className={`text-xs rounded-lg px-2.5 py-1.5 border transition ${
+              showOriginal
+                ? 'bg-gray-800 text-white border-gray-800'
+                : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+            title={showOriginal ? 'Showing original language' : 'Showing English translation'}
+          >
+            {showOriginal ? '🌐 Original' : '🇬🇧 Translated'}
+          </button>
+
+          {/* Export */}
+          <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden text-xs">
+            <button
+              onClick={() => exportCSV(items, profileName)}
+              disabled={items.length === 0}
+              className="px-2.5 py-1.5 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
+              title="Export as CSV"
+            >↓ CSV</button>
+            <span className="w-px h-4 bg-gray-200 shrink-0" />
+            <button
+              onClick={() => exportPDF(items, profileName)}
+              disabled={items.length === 0}
+              className="px-2.5 py-1.5 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
+              title="Export as PDF"
+            >↓ PDF</button>
+          </div>
         </div>
       </div>
 
@@ -261,7 +370,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
 
       <div className="space-y-2">
         {items.map(item => (
-          <Card key={item.id} item={item} isNew={item.is_new} />
+          <Card key={item.id} item={item} isNew={item.is_new} showOriginal={showOriginal} />
         ))}
       </div>
 

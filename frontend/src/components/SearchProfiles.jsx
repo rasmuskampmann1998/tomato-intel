@@ -1,10 +1,34 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8004'
+
 const FREQ_OPTIONS = ['daily', 'weekly', 'monthly']
-const LANG_OPTIONS = ['en', 'zh', 'ja', 'hi', 'es', 'ar', 'tr', 'nl', 'da', 'de', 'fr']
+
+const LANG_OPTIONS = [
+  { code: 'en', flag: '🇬🇧', name: 'English' },
+  { code: 'nl', flag: '🇳🇱', name: 'Dutch' },
+  { code: 'de', flag: '🇩🇪', name: 'German' },
+  { code: 'fr', flag: '🇫🇷', name: 'French' },
+  { code: 'es', flag: '🇪🇸', name: 'Spanish' },
+  { code: 'da', flag: '🇩🇰', name: 'Danish' },
+  { code: 'sv', flag: '🇸🇪', name: 'Swedish' },
+  { code: 'zh', flag: '🇨🇳', name: 'Chinese' },
+  { code: 'ja', flag: '🇯🇵', name: 'Japanese' },
+  { code: 'ar', flag: '🇸🇦', name: 'Arabic' },
+  { code: 'hi', flag: '🇮🇳', name: 'Hindi' },
+  { code: 'tr', flag: '🇹🇷', name: 'Turkish' },
+  { code: 'pt', flag: '🇧🇷', name: 'Portuguese' },
+  { code: 'ko', flag: '🇰🇷', name: 'Korean' },
+  { code: 'ru', flag: '🇷🇺', name: 'Russian' },
+]
 
 function ProfileCard({ profile, selected, onSelect, onEdit, onDelete }) {
+  const langLabels = (profile.languages || ['en']).map(code => {
+    const l = LANG_OPTIONS.find(o => o.code === code)
+    return l ? `${l.flag} ${l.name}` : code.toUpperCase()
+  })
+
   return (
     <div
       onClick={() => onSelect(profile)}
@@ -19,15 +43,17 @@ function ProfileCard({ profile, selected, onSelect, onEdit, onDelete }) {
           <p className="font-medium text-gray-900 text-sm truncate">
             {profile.name || profile.search_terms.join(', ')}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {profile.search_terms.join(' · ')}
-          </p>
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {profile.search_terms.map(t => (
+              <span key={t} className="text-xs bg-green-100 text-green-800 rounded-full px-2 py-0.5">{t}</span>
+            ))}
+          </div>
           {profile.intelligence_brief && (
-            <p className="text-xs text-blue-600 mt-1">AI brief active</p>
+            <p className="text-xs text-blue-600 mt-1.5">AI brief active</p>
           )}
-          <div className="flex gap-2 mt-2 flex-wrap">
-            {(profile.languages || ['en']).map(l => (
-              <span key={l} className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{l.toUpperCase()}</span>
+          <div className="flex gap-1.5 mt-2 flex-wrap">
+            {langLabels.map(l => (
+              <span key={l} className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{l}</span>
             ))}
             <span className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{profile.frequency || 'weekly'}</span>
           </div>
@@ -48,26 +74,65 @@ function ProfileCard({ profile, selected, onSelect, onEdit, onDelete }) {
   )
 }
 
-function ProfileForm({ categoryId, profile, onSave, onCancel }) {
+function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
   const [name, setName] = useState(profile?.name || '')
-  const [terms, setTerms] = useState(profile?.search_terms?.join(', ') || '')
+  const [termTags, setTermTags] = useState(profile?.search_terms || [])
+  const [tagInput, setTagInput] = useState('')
   const [langs, setLangs] = useState(profile?.languages || ['en'])
   const [freq, setFreq] = useState(profile?.frequency || 'weekly')
   const [brief, setBrief] = useState(profile?.intelligence_brief || '')
   const [saving, setSaving] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState([])
+  const [suggestError, setSuggestError] = useState('')
 
-  const toggleLang = (l) => setLangs(prev => prev.includes(l) ? prev.filter(x => x !== l) : [...prev, l])
+  const addTag = (raw) => {
+    const t = raw.trim().replace(/,+$/, '')
+    if (t && !termTags.includes(t)) setTermTags(prev => [...prev, t])
+  }
+
+  const handleTagKeyDown = (e) => {
+    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+      e.preventDefault()
+      addTag(tagInput)
+      setTagInput('')
+    } else if (e.key === 'Backspace' && !tagInput && termTags.length > 0) {
+      setTermTags(prev => prev.slice(0, -1))
+    }
+  }
+
+  const toggleLang = (code) =>
+    setLangs(prev => prev.includes(code) ? prev.filter(x => x !== code) : [...prev, code])
+
+  const handleSuggest = async () => {
+    if (termTags.length === 0) return
+    setSuggesting(true)
+    setAiSuggestions([])
+    setSuggestError('')
+    try {
+      const res = await fetch(`${API_BASE}/search/suggest-keywords`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ terms: termTags, brief, category_slug: categorySlug || '' }),
+      })
+      const data = await res.json()
+      setAiSuggestions((data.suggestions || []).filter(s => !termTags.includes(s)))
+    } catch {
+      setSuggestError('Could not reach suggestion service')
+    } finally {
+      setSuggesting(false)
+    }
+  }
 
   const handleSave = async () => {
-    const searchTerms = terms.split(',').map(t => t.trim()).filter(Boolean)
-    if (!searchTerms.length) return
+    if (!termTags.length) return
     setSaving(true)
     const { data: { session } } = await supabase.auth.getSession()
     const row = {
       user_id: session?.user?.id ?? null,
       category_id: categoryId,
-      name: name || searchTerms.join(', '),
-      search_terms: searchTerms,
+      name: name || termTags.join(', '),
+      search_terms: termTags,
       languages: langs,
       frequency: freq,
       intelligence_brief: brief || null,
@@ -83,28 +148,98 @@ function ProfileForm({ categoryId, profile, onSave, onCancel }) {
   }
 
   return (
-    <div className="border border-green-200 bg-green-50 rounded-xl p-4 space-y-3">
+    <div className="border border-green-200 bg-green-50 rounded-xl p-4 space-y-4">
+      {/* Profile name */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">Profile name</label>
         <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. ToBRFV Resistance"
           className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
       </div>
+
+      {/* Keyword tag input */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Search terms (comma-separated)</label>
-        <input value={terms} onChange={e => setTerms(e.target.value)} placeholder="tomato, ToBRFV, disease resistance"
-          className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs font-medium text-gray-600">Keywords</label>
+          <button
+            onClick={handleSuggest}
+            disabled={suggesting || termTags.length === 0}
+            className="text-xs text-purple-600 hover:text-purple-800 border border-purple-200 bg-white rounded-lg px-2.5 py-1 disabled:opacity-40 transition"
+          >
+            {suggesting ? '⟳ Suggesting…' : '✨ AI Suggest'}
+          </button>
+        </div>
+
+        {/* Tag pills + text input in one box */}
+        <div
+          className="flex flex-wrap gap-1.5 w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-green-500 cursor-text"
+          onClick={() => document.getElementById('tag-input')?.focus()}
+        >
+          {termTags.map(t => (
+            <span key={t} className="flex items-center gap-0.5 bg-green-100 text-green-800 text-xs rounded-full px-2.5 py-1 shrink-0">
+              {t}
+              <button
+                onClick={e => { e.stopPropagation(); setTermTags(prev => prev.filter(x => x !== t)) }}
+                className="text-green-600 hover:text-green-900 ml-0.5 leading-none"
+              >×</button>
+            </span>
+          ))}
+          <input
+            id="tag-input"
+            value={tagInput}
+            onChange={e => setTagInput(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            onBlur={() => { if (tagInput.trim()) { addTag(tagInput); setTagInput('') } }}
+            placeholder={termTags.length === 0 ? 'Type a term and press Enter…' : ''}
+            className="flex-1 min-w-[120px] outline-none text-sm bg-transparent py-0.5"
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-1">Press Enter or comma to add · Backspace removes last tag</p>
+
+        {/* AI suggestion chips */}
+        {aiSuggestions.length > 0 && (
+          <div className="mt-2">
+            <p className="text-xs text-gray-400 mb-1.5">Click to add:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {aiSuggestions.map(s => (
+                <button
+                  key={s}
+                  onClick={() => {
+                    setTermTags(p => p.includes(s) ? p : [...p, s])
+                    setAiSuggestions(p => p.filter(x => x !== s))
+                  }}
+                  className="text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded-full px-2.5 py-0.5 hover:bg-purple-100 transition"
+                >
+                  + {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {suggestError && <p className="text-xs text-red-500 mt-1">{suggestError}</p>}
       </div>
+
+      {/* Language picker */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Languages</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1.5">Languages</label>
         <div className="flex flex-wrap gap-1.5">
           {LANG_OPTIONS.map(l => (
-            <button key={l} onClick={() => toggleLang(l)}
-              className={`px-2 py-1 text-xs rounded-md border ${langs.includes(l) ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300'}`}>
-              {l.toUpperCase()}
+            <button
+              key={l.code}
+              onClick={() => toggleLang(l.code)}
+              className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-full border transition ${
+                langs.includes(l.code)
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              <span>{l.flag}</span>
+              <span>{l.name}</span>
             </button>
           ))}
         </div>
       </div>
+
+      {/* Frequency */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">Frequency</label>
         <div className="flex gap-2">
@@ -116,10 +251,12 @@ function ProfileForm({ categoryId, profile, onSave, onCancel }) {
           ))}
         </div>
       </div>
+
+      {/* Intelligence brief */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">
           Intelligence Brief
-          <span className="ml-1 font-normal text-gray-400">(optional â€” AI uses this to filter relevance)</span>
+          <span className="ml-1 font-normal text-gray-400">(optional — AI uses this to filter relevance)</span>
         </label>
         <textarea
           value={brief} onChange={e => setBrief(e.target.value)} rows={5}
@@ -128,8 +265,9 @@ function ProfileForm({ categoryId, profile, onSave, onCancel }) {
         />
         <p className="text-xs text-gray-400 mt-1">Claude scores each matched article against this brief and surfaces the most relevant ones.</p>
       </div>
+
       <div className="flex gap-2 pt-1">
-        <button onClick={handleSave} disabled={saving}
+        <button onClick={handleSave} disabled={saving || termTags.length === 0}
           className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg disabled:opacity-50">
           {saving ? 'Saving...' : 'Save Profile'}
         </button>
@@ -176,8 +314,13 @@ export default function SearchProfiles({ category, selectedProfile, onProfileSel
         )}
       </div>
       {showForm && (
-        <ProfileForm categoryId={category.id} profile={editingProfile} onSave={handleSaved}
-          onCancel={() => { setShowForm(false); setEditingProfile(null) }} />
+        <ProfileForm
+          categoryId={category.id}
+          categorySlug={category.slug}
+          profile={editingProfile}
+          onSave={handleSaved}
+          onCancel={() => { setShowForm(false); setEditingProfile(null) }}
+        />
       )}
       {profiles.length === 0 && !showForm && (
         <p className="text-sm text-gray-400 italic">No profiles yet. Create one to start tracking.</p>

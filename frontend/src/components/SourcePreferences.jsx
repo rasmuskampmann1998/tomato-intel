@@ -153,7 +153,7 @@ export default function SourcePreferences({
       ) : sources.length === 0 ? (
         <p className="text-sm text-gray-400 italic">No sources configured for this category.</p>
       ) : (
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="border border-gray-200 rounded-lg overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">

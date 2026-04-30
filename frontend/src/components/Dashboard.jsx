@@ -7,6 +7,16 @@ import SearchProfiles from './SearchProfiles'
 import ResultsFeed from './ResultsFeed'
 import SourcePreferences from './SourcePreferences'
 
+const ICONS = {
+  news: '📰',
+  competitors: '🏢',
+  crop_recommendations: '🌱',
+  patents: '📋',
+  regulations: '⚖️',
+  genetics: '🧬',
+  social: '💬',
+}
+
 export default function Dashboard() {
   const [user] = useState(null)  // demo: no auth
   const [userRole] = useState('user')
@@ -87,16 +97,41 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* Mobile category pill tabs — hidden on desktop */}
+      <div className="lg:hidden bg-white border-b border-gray-200 overflow-x-auto flex gap-2 px-3 py-2 shrink-0">
+        {categories.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => handleCategorySelect(cat)}
+            className={`shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition ${
+              selectedCategory?.id === cat.id
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <span>{ICONS[cat.slug] || '📁'}</span>
+            <span>{cat.name}</span>
+            {(badgeCounts?.[cat.id] || 0) > 0 && (
+              <span className="bg-black/20 text-white text-xs rounded-full px-1.5 ml-0.5">
+                {badgeCounts[cat.id]}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
-        <CategorySidebar
-          categories={categories}
-          selected={selectedCategory}
-          onSelect={handleCategorySelect}
-          badgeCounts={badgeCounts}
-        />
+        <div className="hidden lg:block">
+          <CategorySidebar
+            categories={categories}
+            selected={selectedCategory}
+            onSelect={handleCategorySelect}
+            badgeCounts={badgeCounts}
+          />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 lg:p-6">
           {selectedCategory && (
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="flex items-center justify-between">
