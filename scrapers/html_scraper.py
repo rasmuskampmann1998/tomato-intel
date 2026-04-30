@@ -98,8 +98,18 @@ def scrape_html(source: dict) -> list[dict]:
         logger.warning(f"[HTML] HTTP {e.response.status_code} for {url}")
         return []
     except Exception as e:
-        logger.error(f"[HTML] Request failed for {url}: {e}")
-        return []
+        if "CERTIFICATE" in str(e).upper() or "SSL" in str(e).upper():
+            logger.warning(f"[HTML] SSL error for {url}, retrying without verification")
+            try:
+                with httpx.Client(headers=HEADERS, timeout=20, follow_redirects=True, verify=False) as client:
+                    resp = client.get(url)
+                    resp.raise_for_status()
+            except Exception as e2:
+                logger.error(f"[HTML] SSL bypass also failed for {url}: {e2}")
+                return []
+        else:
+            logger.error(f"[HTML] Request failed for {url}: {e}")
+            return []
 
     soup = BeautifulSoup(resp.text, "lxml")
     items = []
