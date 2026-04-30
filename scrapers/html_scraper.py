@@ -33,7 +33,7 @@ DOMAIN_SELECTORS = {
     "revistas.chapingo.mx":   [".article-title a", ".titulo a", "h3 a"],
     "rijkzwaan.com":          ["article h3 a", ".press-release-title a", "h3 a"],
     "enzazaden.com":          [".news-item h3 a", "article h3 a", "h3 a"],
-    "bejo.com":               [".news-card h3 a", "article h3 a", "h3 a"],
+    "bejo.com":               ["h2.teaser__title a", "article h2 a", "h3 a"],
     "deruiterseeds.com":      ["article h3 a", ".news-item h3 a", "h3 a"],
     "syngenta.com":           [".news-card h3 a", "article h3 a", "h3 a"],
     "apnews.com":             ["h3.PagePromo-title a", "[data-key='card-headline'] a", ".PagePromo-title a", "h2 a"],

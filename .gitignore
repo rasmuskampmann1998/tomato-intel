@@ -49,3 +49,5 @@ supabase/.temp
 # old test files with hardcoded keys
 test/
 tests/
+
+.vercel
