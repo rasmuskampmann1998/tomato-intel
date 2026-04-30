@@ -26,6 +26,7 @@ from scrapers.zenrows_scraper import scrape_zenrows
 from scrapers.apify_scraper import scrape_apify_web, scrape_apify_content_crawler
 from scrapers.claude_scraper import scrape_claude
 from scrapers.crossref_scraper import scrape_crossref, JOURNAL_ISSNS
+from scrapers.crawl4ai_scraper import scrape_crawl4ai
 from scrapers.article_enricher import enrich_items
 from scrapers.patent_epo import search_epo
 from scrapers.patent_uspto import search_uspto
@@ -257,9 +258,14 @@ def run_category(category_slug: str, sources: list[dict], search_terms: list[str
                 logger.info(f"HTML→Playwright fallback for {source['name']}")
                 items = scrape_playwright(source)
 
+            # Layer 3.5: Crawl4AI (anti-bot headless, free, handles 403 + JS sites)
+            if not items:
+                logger.info(f"Playwright→Crawl4AI fallback for {source['name']}")
+                items = scrape_crawl4ai(source)
+
             # Layer 4: ZenRows (anti-bot bypass + JS rendering, ~$0.001/req)
             if not items:
-                logger.info(f"Playwright→ZenRows fallback for {source['name']}")
+                logger.info(f"Crawl4AI→ZenRows fallback for {source['name']}")
                 items = scrape_zenrows(source)
 
             is_required = source.get("is_required", False)
