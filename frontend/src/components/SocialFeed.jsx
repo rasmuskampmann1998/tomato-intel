@@ -70,8 +70,26 @@ export default function SocialFeed() {
     setWatchedAccounts(data || [])
   }, [])
 
+  const [newPosts, setNewPosts] = useState(0)
+
   useEffect(() => { loadItems() }, [loadItems])
   useEffect(() => { loadWatchedAccounts() }, [loadWatchedAccounts])
+
+  // Realtime: listen for new social scraped_items
+  useEffect(() => {
+    const channel = supabase
+      .channel('social-items-live')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'scraped_items',
+        filter: 'category_slug=eq.social',
+      }, () => {
+        setNewPosts(n => n + 1)
+      })
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [])
 
   // Build a lookup: author+platform → account_type
   const accountTypeMap = {}
@@ -276,6 +294,15 @@ export default function SocialFeed() {
             </div>
           )}
         </div>
+      )}
+
+      {newPosts > 0 && (
+        <button
+          onClick={() => { setNewPosts(0); loadItems() }}
+          className="w-full text-xs bg-green-50 border border-green-200 text-green-700 rounded-lg py-2 hover:bg-green-100 transition font-medium"
+        >
+          ↑ {newPosts} new {newPosts === 1 ? 'post' : 'posts'} — click to refresh
+        </button>
       )}
 
       {/* Platform tab bar */}

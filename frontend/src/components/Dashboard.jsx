@@ -7,6 +7,8 @@ import SearchProfiles from './SearchProfiles'
 import ResultsFeed from './ResultsFeed'
 import SourcePreferences from './SourcePreferences'
 import SocialFeed from './SocialFeed'
+import SearchOverlay from './SearchOverlay'
+import TrendingBanner from './TrendingBanner'
 
 const ICONS = {
   news: '📰',
@@ -27,19 +29,20 @@ export default function Dashboard() {
   const [badgeCounts, setBadgeCounts] = useState({})
   const [showSources, setShowSources] = useState(false)
   const [followedSourceIds, setFollowedSourceIds] = useState([])
+  const [showSearch, setShowSearch] = useState(false)
 
   const { profile } = useUserProfile(null)
-  const experience = 'researcher'
+  const [experience, setExperience] = useState('researcher')
   const expConfig = EXPERIENCE_CONFIG[experience]
 
-  // Re-order categories whenever experience loads
+  // Re-order categories whenever experience changes
   useEffect(() => {
-    if (categories.length && profile) {
+    if (categories.length) {
       const ordered = getCategoryOrder(experience, categories)
       setCategories(ordered)
       setSelectedCategory(prev => prev || ordered[0])
     }
-  }, [profile?.experience])
+  }, [experience])
 
   const loadCategories = async () => {
     const { data } = await supabase
@@ -67,6 +70,18 @@ export default function Dashboard() {
   useEffect(() => { loadCategories() }, [])
   useEffect(() => { loadBadgeCounts() }, [selectedCategory])
 
+  // Cmd+K / Ctrl+K to open search
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowSearch(s => !s)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
   const handleCategorySelect = (cat) => {
     setSelectedCategory(cat)
     setSelectedProfile(null)
@@ -90,13 +105,36 @@ export default function Dashboard() {
             <span className="text-gray-400 text-xs ml-2">{expConfig.description}</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs rounded-full px-2.5 py-0.5 font-medium bg-blue-100 text-blue-700">
-            {expConfig.icon} {expConfig.label}
-          </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSearch(true)}
+            className="hidden sm:flex items-center gap-2 text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-1.5 transition"
+            title="Search (Ctrl+K)"
+          >
+            🔍 <span className="text-gray-400">Search</span>
+            <kbd className="bg-white text-gray-400 rounded px-1 py-0.5 text-xs shadow-sm">⌘K</kbd>
+          </button>
+          <div className="hidden sm:flex bg-gray-100 rounded-lg p-0.5 gap-0.5">
+            {Object.entries(EXPERIENCE_CONFIG).map(([key, cfg]) => (
+              <button
+                key={key}
+                onClick={() => setExperience(key)}
+                title={cfg.description}
+                className={`text-xs px-2 py-1 rounded-md font-medium transition ${
+                  experience === key
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {cfg.icon} {cfg.label}
+              </button>
+            ))}
+          </div>
           <span className="text-xs bg-gray-100 text-gray-500 rounded px-2 py-0.5">Demo</span>
         </div>
       </header>
+
+      <TrendingBanner onTopicClick={() => setShowSearch(true)} />
 
       {/* Mobile category pill tabs — hidden on desktop */}
       <div className="lg:hidden bg-white border-b border-gray-200 overflow-x-auto flex gap-2 px-3 py-2 shrink-0">
@@ -195,6 +233,8 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
     </div>
   )
 }

@@ -230,6 +230,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('date')
+  const [minRelevance, setMinRelevance] = useState(0)
   const [showOriginal, setShowOriginal] = useState(false)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 25
@@ -277,6 +278,11 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
     if (followedSourceIds.length > 0) {
       results = results.filter(item => followedSourceIds.includes(item.scraped_items?.source_id))
     }
+    if (minRelevance > 0) {
+      results = results.filter(item =>
+        (item.scraped_items?.interpreted_items?.relevance_score || 0) >= minRelevance
+      )
+    }
     if (sortBy === 'relevance') {
       results = results.sort((a, b) =>
         (b.scraped_items?.interpreted_items?.relevance_score || 0) -
@@ -286,10 +292,29 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
 
     setItems(results)
     setLoading(false)
-  }, [profile, category, filter, sortBy, page, followedSourceIds])
+  }, [profile, category, filter, sortBy, minRelevance, page, followedSourceIds])
 
-  useEffect(() => { setPage(0); setItems([]) }, [profile, filter, sortBy])
+  const [newCount, setNewCount] = useState(0)
+
+  useEffect(() => { setPage(0); setItems([]); setNewCount(0) }, [profile, filter, sortBy, minRelevance])
   useEffect(() => { loadItems() }, [loadItems])
+
+  // Realtime: listen for new profile_items inserts for this profile
+  useEffect(() => {
+    if (!profile?.id) return
+    const channel = supabase
+      .channel(`profile-items-${profile.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'profile_items',
+        filter: `search_profile_id=eq.${profile.id}`,
+      }, () => {
+        setNewCount(n => n + 1)
+      })
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [profile?.id])
 
   const Card = CARD_COMPONENTS[cardStyle] || ResultCard
   const profileName = profile?.name || profile?.search_terms?.join(', ') || 'export'
@@ -328,6 +353,15 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
             <option value="relevance">Sort: Relevance</option>
           </select>
 
+          {/* Relevance filter */}
+          <select value={minRelevance} onChange={e => setMinRelevance(Number(e.target.value))}
+            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600">
+            <option value={0}>All scores</option>
+            <option value={5}>5+ relevant</option>
+            <option value={7}>7+ important</option>
+            <option value={9}>9+ critical</option>
+          </select>
+
           {/* Original / Translated toggle */}
           <button
             onClick={() => setShowOriginal(v => !v)}
@@ -359,6 +393,15 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
           </div>
         </div>
       </div>
+
+      {newCount > 0 && (
+        <button
+          onClick={() => { setNewCount(0); loadItems() }}
+          className="w-full text-xs bg-green-50 border border-green-200 text-green-700 rounded-lg py-2 hover:bg-green-100 transition font-medium"
+        >
+          ↑ {newCount} new {newCount === 1 ? 'item' : 'items'} — click to refresh
+        </button>
+      )}
 
       {loading && <div className="text-sm text-gray-400 py-4 text-center">Loading...</div>}
 

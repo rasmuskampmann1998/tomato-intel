@@ -8,7 +8,7 @@ const path = require('path')
 
 const SUPABASE_URL = 'https://evifsyqtrwwetfqkvlni.supabase.co'
 const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aWZzeXF0cnd3ZXRmcWt2bG5pIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzI5MDU3MSwiZXhwIjoyMDkyODY2NTcxfQ.yn1ZqcnV7dAqV-4VsaZWbafnDno72rqblJcVX1kc6tk'
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aWZzeXF0cnd3ZXRmcWt2bG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTA1NzEsImV4cCI6MjA5Mjg2NjU3MX0.Ku7lNHEbYSFXKFAmIWkBH_cj7YiqE5ZhMK2rQ3RFxKI'
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2aWZzeXF0cnd3ZXRmcWt2bG5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTA1NzEsImV4cCI6MjA5Mjg2NjU3MX0.Gv8xcQ4mseUuJlAYt2eoGyEGfIlbnhd6B0HnIV5M15o'
 
 const STATUS_FILE = path.join(
   'C:\\Users\\rasmu\\.claude\\projects\\c--Users-rasmu-OneDrive-Digi-tal-Outbound-Programs-N8n\\memory\\tomato-intel-status.md'

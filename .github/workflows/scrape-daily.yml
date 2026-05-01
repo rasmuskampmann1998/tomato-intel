@@ -52,8 +52,24 @@ jobs:
 
       - name: Run Claude interpreter
         working-directory: market-intelligence
-        run: python processors/claude_interpreter.py --limit 100
+        run: python processors/claude_interpreter.py --limit 200
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+
+      - name: Score profiles
+        working-directory: market-intelligence
+        run: python processors/profile_scorer.py --hours 48
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+      - name: Detect trends
+        working-directory: market-intelligence
+        run: python processors/trend_detector.py --hours 48 --min-sources 3
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
