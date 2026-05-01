@@ -11,10 +11,10 @@ const STEP_ICONS = {
   pending: '○',
 }
 const STEP_COLORS = {
-  running: 'text-blue-500',
-  success: 'text-green-500',
-  failed: 'text-red-400',
-  pending: 'text-gray-300',
+  running: 'text-ink-mute animate-spin',
+  success: 'text-leaf',
+  failed: 'text-tomato',
+  pending: 'text-rule',
 }
 
 function StepRow({ step, strategy, status, message, itemsFound }) {
@@ -22,19 +22,19 @@ function StepRow({ step, strategy, status, message, itemsFound }) {
   const color = STEP_COLORS[status] || STEP_COLORS.pending
   return (
     <div className="flex items-start gap-3 py-1.5">
-      <span className={`text-base font-bold shrink-0 w-5 text-center ${color} ${status === 'running' ? 'animate-spin' : ''}`}>
+      <span className={`text-base font-bold shrink-0 w-5 text-center ${color}`}>
         {icon}
       </span>
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium text-gray-700">{strategy}</span>
+        <span className="font-body text-sm text-ink">{strategy}</span>
         {message && (
-          <p className={`text-xs mt-0.5 ${status === 'failed' ? 'text-red-400' : status === 'success' ? 'text-green-600' : 'text-gray-400'}`}>
+          <p className={`font-mono text-[10px] mt-0.5 ${status === 'failed' ? 'text-tomato' : status === 'success' ? 'text-leaf' : 'text-ink-mute'}`}>
             {message}
           </p>
         )}
       </div>
       {status === 'success' && itemsFound > 0 && (
-        <span className="text-xs text-green-600 font-medium shrink-0">{itemsFound} articles</span>
+        <span className="font-mono text-[10px] text-leaf font-medium shrink-0">{itemsFound} articles</span>
       )}
     </div>
   )
@@ -140,14 +140,14 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-paper border border-rule w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-rule flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-gray-900">Add a source</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{category.name}</p>
+            <h2 className="font-display text-sm text-ink">Add a source</h2>
+            <p className="font-mono text-[10px] text-ink-mute mt-0.5">{category.name}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+          <button onClick={onClose} className="text-ink-mute hover:text-ink text-lg">✕</button>
         </div>
 
         <div className="px-6 py-5">
@@ -155,22 +155,22 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
           {phase === 'input' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Page URL</label>
+                <label className="font-mono text-[9px] tracking-[0.14em] uppercase text-ink-mute block mb-1">Page URL</label>
                 <input
                   type="url" value={url} onChange={e => setUrl(e.target.value)}
                   placeholder="https://example.com/news"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-rule bg-paper text-ink font-body text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tomato"
                   onKeyDown={e => e.key === 'Enter' && startAnalysis()}
                 />
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="font-mono text-[10px] text-ink-mute mt-1">
                   Paste the homepage or article listing page. The AI will figure out how to scrape it.
                 </p>
               </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              {error && <p className="font-mono text-[10px] text-tomato">{error}</p>}
               <button
                 onClick={startAnalysis}
                 disabled={!url.trim()}
-                className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 rounded-lg disabled:opacity-40 transition"
+                className="w-full bg-tomato hover:bg-tomato-deep text-paper text-sm font-medium py-2 disabled:opacity-40 transition"
               >
                 Analyse →
               </button>
@@ -180,12 +180,12 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
           {/* Phase: analyzing */}
           {phase === 'analyzing' && (
             <div className="space-y-1">
-              <p className="text-xs text-gray-400 mb-3">Agent is trying strategies one by one...</p>
+              <p className="font-mono text-[10px] text-ink-mute mb-3">Agent is trying strategies one by one...</p>
               {steps.map((s, i) => (
                 <StepRow key={i} {...s} />
               ))}
               {steps.length === 0 && (
-                <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="flex items-center gap-2 text-sm text-ink-mute">
                   <span className="animate-spin">⟳</span> Fetching page...
                 </div>
               )}
@@ -195,31 +195,31 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
           {/* Phase: confirm */}
           {phase === 'confirm' && (
             <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-sm font-medium text-green-700">
+              <div className="bg-tomato-soft border border-tomato/30 p-3">
+                <p className="font-body text-sm text-tomato font-medium">
                   Found {itemsFound} articles
                 </p>
-                <div className="mt-1 text-xs text-green-600 space-y-0.5">
+                <div className="mt-1 font-mono text-[10px] text-ink-soft space-y-0.5">
                   <div>Strategy: <strong>{winningConfig.scrape_type}</strong></div>
                   {winningConfig.rss_url && <div>RSS: {winningConfig.rss_url}</div>}
                   {winningConfig.css_selector && <div>Selector: <code>{winningConfig.css_selector}</code></div>}
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Source name</label>
+                <label className="font-mono text-[9px] tracking-[0.14em] uppercase text-ink-mute block mb-1">Source name</label>
                 <input
                   type="text" value={sourceName} onChange={e => setSourceName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-rule bg-paper text-ink font-body text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tomato"
                 />
               </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              {error && <p className="font-mono text-[10px] text-tomato">{error}</p>}
               <div className="flex gap-2">
                 <button onClick={onClose}
-                  className="flex-1 border border-gray-300 text-gray-600 text-sm py-2 rounded-lg hover:bg-gray-50">
+                  className="flex-1 border border-rule text-ink-mute text-sm py-2 hover:bg-paper-deep transition">
                   Cancel
                 </button>
                 <button onClick={handleSubmit} disabled={saving || !sourceName.trim()}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 rounded-lg disabled:opacity-50 transition">
+                  className="flex-1 bg-tomato hover:bg-tomato-deep text-paper text-sm font-medium py-2 disabled:opacity-50 transition">
                   {saving ? 'Adding...' : 'Add to my feed'}
                 </button>
               </div>
@@ -229,13 +229,13 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
           {/* Phase: done */}
           {phase === 'done' && (
             <div className="text-center py-4">
-              <div className="text-green-500 text-4xl mb-3">✓</div>
-              <p className="text-sm font-medium text-gray-900">Source added!</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <div className="text-leaf text-4xl mb-3">✓</div>
+              <p className="font-body text-sm text-ink font-medium">Source added!</p>
+              <p className="font-mono text-[10px] text-ink-mute mt-1">
                 Articles from <strong>{sourceName}</strong> will appear in your feed after the next scrape run.
               </p>
               <button onClick={onClose}
-                className="mt-4 text-sm text-green-600 hover:underline">
+                className="mt-4 font-mono text-[10px] text-leaf hover:underline">
                 Close
               </button>
             </div>
@@ -244,9 +244,9 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
           {/* Phase: failed */}
           {phase === 'failed' && (
             <div className="space-y-3">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-sm font-medium text-red-700">Could not find a working scraper</p>
-                <p className="text-xs text-red-500 mt-1">
+              <div className="bg-tomato-soft border border-tomato/30 p-3">
+                <p className="font-body text-sm text-tomato font-medium">Could not find a working scraper</p>
+                <p className="font-mono text-[10px] text-ink-soft mt-1">
                   This site may be behind a hard paywall or aggressive bot-blocking.
                   Try a different page from the same site (e.g. an RSS feed URL directly).
                 </p>
@@ -258,11 +258,11 @@ export default function AddSourceModal({ category, onClose, onAdded }) {
               )}
               <div className="flex gap-2">
                 <button onClick={() => { setPhase('input'); setUrl(''); setSteps([]) }}
-                  className="flex-1 border border-gray-300 text-gray-600 text-sm py-2 rounded-lg hover:bg-gray-50">
+                  className="flex-1 border border-rule text-ink-mute text-sm py-2 hover:bg-paper-deep transition">
                   Try again
                 </button>
                 <button onClick={onClose}
-                  className="flex-1 bg-gray-100 text-gray-600 text-sm py-2 rounded-lg hover:bg-gray-200">
+                  className="flex-1 bg-paper-deep text-ink-mute text-sm py-2 hover:bg-paper transition">
                   Close
                 </button>
               </div>
