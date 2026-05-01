@@ -13,7 +13,7 @@ import TrendingBanner from './TrendingBanner'
 const ICONS = {
   news: '📰',
   competitors: '🏢',
-  crop_recommendations: '🌱',
+  crops: '🌱',
   patents: '📋',
   regulations: '⚖️',
   genetics: '🧬',

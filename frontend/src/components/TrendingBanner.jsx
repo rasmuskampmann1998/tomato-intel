@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 const CAT_ICON = {
-  news: '📰', competitors: '🏢', crop_recommendations: '🌱',
+  news: '📰', competitors: '🏢', crops: '🌱',
   patents: '📋', regulations: '⚖️', genetics: '🧬', social: '💬',
 }
 
