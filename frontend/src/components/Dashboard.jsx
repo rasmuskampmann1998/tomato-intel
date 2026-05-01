@@ -95,64 +95,60 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-paper">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-green-600 text-xl">🍅</span>
-          <div>
-            <span className="font-bold text-gray-900 text-sm">Tomato Intel</span>
-            <span className="text-gray-400 text-xs ml-2">{expConfig.description}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
+      <header className="bg-paper-deep border-b border-rule px-5 py-2.5 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => setShowSearch(true)}
-            className="hidden sm:flex items-center gap-2 text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-1.5 transition"
+            className="hidden sm:flex items-center gap-2 text-ink-mute hover:text-ink transition"
             title="Search (Ctrl+K)"
           >
-            🔍 <span className="text-gray-400">Search</span>
-            <kbd className="bg-white text-gray-400 rounded px-1 py-0.5 text-xs shadow-sm">⌘K</kbd>
+            <span className="text-sm">🔍</span>
+            <span className="font-mono text-[10px] tracking-[0.12em] uppercase">Search</span>
+            <kbd className="font-mono text-[9px] border border-rule px-1 py-0.5 text-ink-mute">⌘K</kbd>
           </button>
-          <div className="hidden sm:flex bg-gray-100 rounded-lg p-0.5 gap-0.5">
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex border border-rule overflow-hidden">
             {Object.entries(EXPERIENCE_CONFIG).map(([key, cfg]) => (
               <button
                 key={key}
                 onClick={() => setExperience(key)}
                 title={cfg.description}
-                className={`text-xs px-2 py-1 rounded-md font-medium transition ${
+                className={`font-mono text-[10px] tracking-[0.1em] uppercase px-3 py-1.5 transition ${
                   experience === key
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-ink text-paper'
+                    : 'text-ink-soft hover:bg-paper'
                 }`}
               >
-                {cfg.icon} {cfg.label}
+                {cfg.label}
               </button>
             ))}
           </div>
-          <span className="text-xs bg-gray-100 text-gray-500 rounded px-2 py-0.5">Demo</span>
+          <span className="font-mono text-[9px] tracking-[0.14em] uppercase border border-rule text-ink-mute px-2 py-1">Demo</span>
         </div>
       </header>
 
       <TrendingBanner onTopicClick={() => setShowSearch(true)} />
 
-      {/* Mobile category pill tabs — hidden on desktop */}
-      <div className="lg:hidden bg-white border-b border-gray-200 overflow-x-auto flex gap-2 px-3 py-2 shrink-0">
+      {/* Mobile category tabs — hidden on desktop */}
+      <div className="lg:hidden bg-paper-deep border-b border-rule overflow-x-auto flex gap-0 shrink-0">
         {categories.map(cat => (
           <button
             key={cat.id}
             onClick={() => handleCategorySelect(cat)}
-            className={`shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition ${
+            className={`shrink-0 flex items-center gap-1.5 px-3 py-2 whitespace-nowrap border-r border-rule transition ${
               selectedCategory?.id === cat.id
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-tomato text-paper'
+                : 'text-ink-soft hover:bg-paper'
             }`}
           >
-            <span>{ICONS[cat.slug] || '📁'}</span>
-            <span>{cat.name}</span>
+            <span className="text-sm">{ICONS[cat.slug] || '📁'}</span>
+            <span className="font-display text-[13px]">{cat.name}</span>
             {(badgeCounts?.[cat.id] || 0) > 0 && (
-              <span className="bg-black/20 text-white text-xs rounded-full px-1.5 ml-0.5">
-                {badgeCounts[cat.id]}
+              <span className="font-mono text-[9px] bg-tomato text-paper px-1 ml-0.5">
+                +{badgeCounts[cat.id]}
               </span>
             )}
           </button>
@@ -170,19 +166,24 @@ export default function Dashboard() {
           />
         </div>
 
-        <main className="flex-1 overflow-y-auto p-3 lg:p-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
           {selectedCategory && (
             <div className="max-w-4xl mx-auto space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between gap-4 border-b border-rule pb-4">
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">{selectedCategory.name}</h1>
+                  <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-mute mb-1">
+                    Category
+                  </p>
+                  <h1 className="font-display text-4xl font-400 text-ink leading-tight">{selectedCategory.name}</h1>
                   {selectedCategory.description && (
-                    <p className="text-sm text-gray-500 mt-0.5">{selectedCategory.description}</p>
+                    <p className="font-display italic text-base text-ink-soft mt-1">{selectedCategory.description}</p>
                   )}
                 </div>
                 <button
                   onClick={() => setShowSources(s => !s)}
-                  className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5"
+                  className={`font-mono text-[10px] tracking-[0.12em] uppercase border px-3 py-1.5 transition shrink-0 mt-2 ${
+                    showSources ? 'bg-ink text-paper border-ink' : 'border-rule text-ink-mute hover:bg-paper-deep'
+                  }`}
                 >
                   {showSources ? 'Hide sources' : 'Sources'}
                 </button>
@@ -193,7 +194,7 @@ export default function Dashboard() {
               ) : (
                 <>
                   {showSources && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="bg-paper border border-rule p-4">
                       <SourcePreferences
                         category={selectedCategory}
                         userId={user?.id}
@@ -204,7 +205,7 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="bg-paper border border-rule p-4">
                     <SearchProfiles
                       category={selectedCategory}
                       selectedProfile={selectedProfile}
@@ -213,7 +214,7 @@ export default function Dashboard() {
                   </div>
 
                   {selectedProfile ? (
-                    <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="bg-paper border border-rule p-4">
                       <ResultsFeed
                         profile={selectedProfile}
                         category={selectedCategory}
@@ -223,8 +224,8 @@ export default function Dashboard() {
                       />
                     </div>
                   ) : (
-                    <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-400">
-                      Select a search profile above to view matching results
+                    <div className="bg-paper border border-rule p-8 text-center">
+                      <p className="font-display italic text-ink-mute">Select a search profile above to view results.</p>
                     </div>
                   )}
                 </>
