@@ -227,6 +227,12 @@ def run_category(category_slug: str, sources: list[dict], search_terms: list[str
         items = search_ip_india(search_terms)
         total += save_items(items, dry_run)
 
+        # Update scrape status for all patent sources
+        patent_status = "ok" if total > 0 else "empty"
+        for source in sources:
+            if source.get("id"):
+                update_source_status(source["id"], patent_status)
+
         return total
 
     # News / competitors / regulations / crops / genetics
