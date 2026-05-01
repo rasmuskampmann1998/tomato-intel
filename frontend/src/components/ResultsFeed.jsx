@@ -114,7 +114,39 @@ function exportPDF(items, profileName) {
 
 // ── Card variants ─────────────────────────────────────────────────────────────
 
+function ExpandedBody({ si, ii }) {
+  const summary = ii?.summary_en || si?.content?.slice(0, 600) || ''
+  const body = si?.content
+  const bodyPreview = body ? body.slice(0, 1500) : ''
+  const hasMore = body && body.length > 1500
+
+  return (
+    <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+      {summary && (
+        <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+      )}
+      {bodyPreview && bodyPreview !== summary && (
+        <p className="text-xs text-gray-500 leading-relaxed whitespace-pre-line">
+          {bodyPreview}{hasMore ? '…' : ''}
+        </p>
+      )}
+      {si?.url && (
+        <a
+          href={si.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-green-800 font-medium mt-1"
+        >
+          ↗ Open source
+        </a>
+      )}
+    </div>
+  )
+}
+
 function ResultCard({ item, isNew, showOriginal }) {
+  const [expanded, setExpanded] = useState(false)
   const si = item.scraped_items
   const ii = si?.interpreted_items
   const title   = showOriginal ? (si?.title || '') : (ii?.title_en || si?.title || '(no title)')
@@ -123,17 +155,27 @@ function ResultCard({ item, isNew, showOriginal }) {
   const scoreColor = score >= 7 ? 'bg-green-500' : score >= 4 ? 'bg-yellow-500' : 'bg-gray-400'
 
   return (
-    <div className={`border rounded-lg p-4 bg-white ${isNew ? 'border-green-300' : 'border-gray-200'}`}>
+    <div
+      className={`border rounded-lg p-4 bg-white cursor-pointer transition-colors ${isNew ? 'border-green-300' : 'border-gray-200'} ${expanded ? 'bg-green-50/30' : 'hover:bg-gray-50/50'}`}
+      onClick={() => setExpanded(v => !v)}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <a href={si?.url} target="_blank" rel="noopener noreferrer"
-            className="font-medium text-gray-900 text-sm hover:text-green-700 line-clamp-2">
+          <a
+            href={si?.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="font-medium text-gray-900 text-sm hover:text-green-700 line-clamp-2"
+          >
             {si?.platform && <span className="mr-1">{PLATFORM_ICONS[si.platform] || ''}</span>}
             {title}
           </a>
-          {summary && <p className="text-xs text-gray-500 mt-1 line-clamp-3">{summary}</p>}
+          {!expanded && summary && (
+            <p className="text-xs text-gray-500 mt-1 line-clamp-3">{summary}</p>
+          )}
           <div className="flex flex-wrap items-center gap-2 mt-2">
-            {(ii?.tags || []).slice(0, 5).map(t => <TagBadge key={t} tag={t} />)}
+            {(ii?.tags || []).slice(0, expanded ? 99 : 5).map(t => <TagBadge key={t} tag={t} />)}
             <span className="text-xs text-gray-400">{formatDate(si)}</span>
             <LanguageBadge lang={si?.language} />
             {score && (
@@ -143,13 +185,18 @@ function ResultCard({ item, isNew, showOriginal }) {
             )}
           </div>
         </div>
-        {isNew && <span className="shrink-0 text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">new</span>}
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {isNew && <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">new</span>}
+          <span className="text-gray-400 text-xs mt-1">{expanded ? '▲' : '▼'}</span>
+        </div>
       </div>
+      {expanded && <ExpandedBody si={si} ii={ii} />}
     </div>
   )
 }
 
 function AlertCard({ item, isNew, showOriginal }) {
+  const [expanded, setExpanded] = useState(false)
   const si = item.scraped_items
   const ii = si?.interpreted_items
   const title   = showOriginal ? (si?.title || '') : (ii?.title_en || si?.title || '(no title)')
@@ -160,7 +207,10 @@ function AlertCard({ item, isNew, showOriginal }) {
   const urgencyBadge = score >= 7 ? 'bg-red-100 text-red-700' : score >= 4 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'
 
   return (
-    <div className={`border-l-4 rounded-lg p-4 ${urgencyColor} ${isNew ? 'ring-1 ring-green-300' : ''}`}>
+    <div
+      className={`border-l-4 rounded-lg p-4 cursor-pointer ${urgencyColor} ${isNew ? 'ring-1 ring-green-300' : ''} ${expanded ? 'ring-1 ring-inset ring-black/5' : ''}`}
+      onClick={() => setExpanded(v => !v)}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -169,23 +219,31 @@ function AlertCard({ item, isNew, showOriginal }) {
             <LanguageBadge lang={si?.language} />
             {isNew && <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">new</span>}
           </div>
-          <a href={si?.url} target="_blank" rel="noopener noreferrer"
-            className="font-semibold text-gray-900 text-sm hover:text-green-700 line-clamp-2 block">
+          <a
+            href={si?.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="font-semibold text-gray-900 text-sm hover:text-green-700 line-clamp-2 block"
+          >
             {title}
           </a>
-          {summary && <p className="text-xs text-gray-600 mt-1 line-clamp-2">{summary}</p>}
+          {!expanded && summary && <p className="text-xs text-gray-600 mt-1 line-clamp-2">{summary}</p>}
           {(ii?.tags || []).length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {(ii.tags).slice(0, 4).map(t => <TagBadge key={t} tag={t} />)}
+              {(ii.tags).slice(0, expanded ? 99 : 4).map(t => <TagBadge key={t} tag={t} />)}
             </div>
           )}
         </div>
+        <span className="text-gray-400 text-xs shrink-0 mt-1">{expanded ? '▲' : '▼'}</span>
       </div>
+      {expanded && <ExpandedBody si={si} ii={ii} />}
     </div>
   )
 }
 
 function DataCard({ item, isNew, showOriginal }) {
+  const [expanded, setExpanded] = useState(false)
   const si = item.scraped_items
   const ii = si?.interpreted_items
   const title = showOriginal ? (si?.title || '') : (ii?.title_en || si?.title || '(no title)')
@@ -194,25 +252,37 @@ function DataCard({ item, isNew, showOriginal }) {
   const barColor = score >= 7 ? 'bg-purple-500' : score >= 4 ? 'bg-blue-400' : 'bg-gray-300'
 
   return (
-    <div className={`border rounded-lg p-3 bg-white flex items-center gap-3 ${isNew ? 'border-purple-300' : 'border-gray-200'}`}>
-      <div className="flex-1 min-w-0">
-        <a href={si?.url} target="_blank" rel="noopener noreferrer"
-          className="text-sm font-medium text-gray-900 hover:text-purple-700 line-clamp-1 block">
-          {title}
-        </a>
-        <div className="flex flex-wrap items-center gap-1.5 mt-1">
-          {(ii?.tags || []).slice(0, 6).map(t => <TagBadge key={t} tag={t} />)}
-          <span className="text-xs text-gray-400 ml-1">{formatDate(si)}</span>
-          <LanguageBadge lang={si?.language} />
+    <div
+      className={`border rounded-lg p-3 bg-white flex flex-col cursor-pointer transition-colors ${isNew ? 'border-purple-300' : 'border-gray-200'} ${expanded ? 'bg-purple-50/20' : 'hover:bg-gray-50/50'}`}
+      onClick={() => setExpanded(v => !v)}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <a
+            href={si?.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="text-sm font-medium text-gray-900 hover:text-purple-700 line-clamp-1 block"
+          >
+            {title}
+          </a>
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            {(ii?.tags || []).slice(0, expanded ? 99 : 6).map(t => <TagBadge key={t} tag={t} />)}
+            <span className="text-xs text-gray-400 ml-1">{formatDate(si)}</span>
+            <LanguageBadge lang={si?.language} />
+          </div>
+        </div>
+        <div className="shrink-0 w-16 flex flex-col items-end gap-1">
+          <span className="text-xs text-gray-400">{score}/10</span>
+          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full ${barColor}`} style={{ width: barWidth }} />
+          </div>
+          {isNew && <span className="text-xs text-purple-600 font-medium">new</span>}
+          <span className="text-gray-400 text-xs">{expanded ? '▲' : '▼'}</span>
         </div>
       </div>
-      <div className="shrink-0 w-16 flex flex-col items-end gap-1">
-        <span className="text-xs text-gray-400">{score}/10</span>
-        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full ${barColor}`} style={{ width: barWidth }} />
-        </div>
-        {isNew && <span className="text-xs text-purple-600 font-medium">new</span>}
-      </div>
+      {expanded && <ExpandedBody si={si} ii={ii} />}
     </div>
   )
 }
@@ -231,6 +301,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('date')
   const [minRelevance, setMinRelevance] = useState(0)
+  const [langFilter, setLangFilter] = useState('all')
   const [showOriginal, setShowOriginal] = useState(false)
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 25
@@ -245,7 +316,6 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
       .select(`id, is_new, matched_at, scraped_items!inner (${SCRAPED_SELECT})`)
       .eq('search_profile_id', profile.id)
 
-    // Wire up language filter from profile
     if (profile.languages?.length > 0) {
       piQuery = piQuery.filter('scraped_items.language', 'in', `(${profile.languages.join(',')})`)
     }
@@ -296,7 +366,7 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
 
   const [newCount, setNewCount] = useState(0)
 
-  useEffect(() => { setPage(0); setItems([]); setNewCount(0) }, [profile, filter, sortBy, minRelevance])
+  useEffect(() => { setPage(0); setItems([]); setNewCount(0); setLangFilter('all') }, [profile, filter, sortBy, minRelevance])
   useEffect(() => { loadItems() }, [loadItems])
 
   // Realtime: listen for new profile_items inserts for this profile
@@ -315,6 +385,14 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
       .subscribe()
     return () => supabase.removeChannel(channel)
   }, [profile?.id])
+
+  // Derive available languages from loaded items
+  const availableLangs = [...new Set(items.map(i => i.scraped_items?.language).filter(Boolean))]
+
+  // Apply language filter client-side
+  const displayItems = langFilter === 'all'
+    ? items
+    : items.filter(i => i.scraped_items?.language === langFilter)
 
   const Card = CARD_COMPONENTS[cardStyle] || ResultCard
   const profileName = profile?.name || profile?.search_terms?.join(', ') || 'export'
@@ -362,6 +440,22 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
             <option value={9}>9+ critical</option>
           </select>
 
+          {/* Language filter — only shown when multiple languages present */}
+          {availableLangs.length > 1 && (
+            <select
+              value={langFilter}
+              onChange={e => setLangFilter(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600"
+            >
+              <option value="all">All languages</option>
+              {availableLangs.map(lang => (
+                <option key={lang} value={lang}>
+                  {LANG_FLAGS[lang] || '🌐'} {lang.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          )}
+
           {/* Original / Translated toggle */}
           <button
             onClick={() => setShowOriginal(v => !v)}
@@ -378,15 +472,15 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
           {/* Export */}
           <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden text-xs">
             <button
-              onClick={() => exportCSV(items, profileName)}
-              disabled={items.length === 0}
+              onClick={() => exportCSV(displayItems, profileName)}
+              disabled={displayItems.length === 0}
               className="px-2.5 py-1.5 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
               title="Export as CSV"
             >↓ CSV</button>
             <span className="w-px h-4 bg-gray-200 shrink-0" />
             <button
-              onClick={() => exportPDF(items, profileName)}
-              disabled={items.length === 0}
+              onClick={() => exportPDF(displayItems, profileName)}
+              disabled={displayItems.length === 0}
               className="px-2.5 py-1.5 text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition"
               title="Export as PDF"
             >↓ PDF</button>
@@ -405,14 +499,14 @@ export default function ResultsFeed({ profile, category, cardStyle = 'article', 
 
       {loading && <div className="text-sm text-gray-400 py-4 text-center">Loading...</div>}
 
-      {!loading && items.length === 0 && (
+      {!loading && displayItems.length === 0 && (
         <div className="text-sm text-gray-400 py-8 text-center">
           No results yet. Scrapers run on schedule and will populate this feed.
         </div>
       )}
 
       <div className="space-y-2">
-        {items.map(item => (
+        {displayItems.map(item => (
           <Card key={item.id} item={item} isNew={item.is_new} showOriginal={showOriginal} />
         ))}
       </div>
