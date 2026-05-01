@@ -7,66 +7,81 @@ const FREQ_OPTIONS = ['daily', 'weekly', 'monthly']
 
 const LANG_OPTIONS = [
   { code: 'en', flag: '🇬🇧', name: 'English' },
-  { code: 'nl', flag: '🇳🇱', name: 'Dutch' },
-  { code: 'de', flag: '🇩🇪', name: 'German' },
-  { code: 'fr', flag: '🇫🇷', name: 'French' },
+  { code: 'zh', flag: '🇨🇳', name: 'Chinese' },
+  { code: 'hi', flag: '🇮🇳', name: 'Hindi' },
+  { code: 'ja', flag: '🇯🇵', name: 'Japanese' },
   { code: 'es', flag: '🇪🇸', name: 'Spanish' },
+  { code: 'pt', flag: '🇧🇷', name: 'Portuguese' },
+  { code: 'ar', flag: '🇸🇦', name: 'Arabic' },
+  { code: 'tr', flag: '🇹🇷', name: 'Turkish' },
+  { code: 'ru', flag: '🇷🇺', name: 'Russian' },
+  { code: 'fr', flag: '🇫🇷', name: 'French' },
+  { code: 'de', flag: '🇩🇪', name: 'German' },
+  { code: 'nl', flag: '🇳🇱', name: 'Dutch' },
   { code: 'da', flag: '🇩🇰', name: 'Danish' },
   { code: 'sv', flag: '🇸🇪', name: 'Swedish' },
-  { code: 'zh', flag: '🇨🇳', name: 'Chinese' },
-  { code: 'ja', flag: '🇯🇵', name: 'Japanese' },
-  { code: 'ar', flag: '🇸🇦', name: 'Arabic' },
-  { code: 'hi', flag: '🇮🇳', name: 'Hindi' },
-  { code: 'tr', flag: '🇹🇷', name: 'Turkish' },
-  { code: 'pt', flag: '🇧🇷', name: 'Portuguese' },
   { code: 'ko', flag: '🇰🇷', name: 'Korean' },
-  { code: 'ru', flag: '🇷🇺', name: 'Russian' },
 ]
 
 function ProfileCard({ profile, selected, onSelect, onEdit, onDelete }) {
-  const langLabels = (profile.languages || ['en']).map(code => {
-    const l = LANG_OPTIONS.find(o => o.code === code)
-    return l ? `${l.flag} ${l.name}` : code.toUpperCase()
-  })
+  const langs = (profile.languages || ['en'])
+  const isSelected = selected?.id === profile.id
 
   return (
     <div
       onClick={() => onSelect(profile)}
-      className={`border rounded-xl p-4 cursor-pointer transition ${
-        selected?.id === profile.id
-          ? 'border-green-400 bg-green-50'
-          : 'border-gray-200 bg-white hover:border-gray-300'
+      className={`border cursor-pointer transition p-3 ${
+        isSelected ? 'border-tomato bg-tomato-soft' : 'border-rule bg-paper hover:bg-paper-deep'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-gray-900 text-sm truncate">
-            {profile.name || profile.search_terms.join(', ')}
+          <p className={`font-display text-[14px] truncate ${isSelected ? 'text-tomato' : 'text-ink'}`}>
+            {profile.name || profile.search_terms.join(' + ')}
           </p>
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {profile.search_terms.map(t => (
-              <span key={t} className="text-xs bg-green-100 text-green-800 rounded-full px-2 py-0.5">{t}</span>
+            {profile.search_terms.map((t, i) => (
+              <span key={t} className="flex items-center">
+                <span className="font-mono text-[10px] bg-paper-deep border border-rule px-1.5 py-0.5 text-ink-soft">
+                  {t}
+                </span>
+                {i < profile.search_terms.length - 1 && (
+                  <span className="font-mono text-[10px] text-tomato mx-0.5">+</span>
+                )}
+              </span>
             ))}
           </div>
-          {profile.intelligence_brief && (
-            <p className="text-xs text-blue-600 mt-1.5">AI brief active</p>
-          )}
-          <div className="flex gap-1.5 mt-2 flex-wrap">
-            {langLabels.map(l => (
-              <span key={l} className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{l}</span>
-            ))}
-            <span className="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5">{profile.frequency || 'weekly'}</span>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <span className="font-mono text-[9px] text-ink-mute">
+              🌐 {langs.length} {langs.length === 1 ? 'language' : 'languages'}
+            </span>
+            <span className="font-mono text-[9px] border border-rule px-1.5 py-0.5 text-ink-mute bg-paper-deep">
+              {profile.frequency || 'weekly'}
+            </span>
+            {profile.intelligence_brief && (
+              <span className="font-mono text-[9px] text-tomato">AI brief</span>
+            )}
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           {profile.new_since_last_visit > 0 && (
-            <span className="bg-green-500 text-white text-xs rounded-full px-2 py-0.5">
-              {profile.new_since_last_visit} new
+            <span className="font-mono text-[9px] tracking-[0.1em] uppercase bg-tomato text-paper px-1.5 py-0.5">
+              +{profile.new_since_last_visit}
             </span>
           )}
           <div className="flex gap-1 mt-1">
-            <button onClick={e => { e.stopPropagation(); onEdit(profile) }} className="text-xs text-gray-400 hover:text-gray-600 px-1">Edit</button>
-            <button onClick={e => { e.stopPropagation(); onDelete(profile.id) }} className="text-xs text-red-400 hover:text-red-600 px-1">Delete</button>
+            <button
+              onClick={e => { e.stopPropagation(); onEdit(profile) }}
+              className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink-mute hover:text-ink px-1"
+            >
+              Edit
+            </button>
+            <button
+              onClick={e => { e.stopPropagation(); onDelete(profile.id) }}
+              className="font-mono text-[9px] tracking-[0.1em] uppercase text-tomato/60 hover:text-tomato px-1"
+            >
+              ×
+            </button>
           </div>
         </div>
       </div>
@@ -93,9 +108,7 @@ function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
 
   const handleTagKeyDown = (e) => {
     if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
-      e.preventDefault()
-      addTag(tagInput)
-      setTagInput('')
+      e.preventDefault(); addTag(tagInput); setTagInput('')
     } else if (e.key === 'Backspace' && !tagInput && termTags.length > 0) {
       setTermTags(prev => prev.slice(0, -1))
     }
@@ -106,9 +119,7 @@ function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
 
   const handleSuggest = async () => {
     if (termTags.length === 0) return
-    setSuggesting(true)
-    setAiSuggestions([])
-    setSuggestError('')
+    setSuggesting(true); setAiSuggestions([]); setSuggestError('')
     try {
       const res = await fetch(`${API_BASE}/search/suggest-keywords`, {
         method: 'POST',
@@ -148,39 +159,48 @@ function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
   }
 
   return (
-    <div className="border border-green-200 bg-green-50 rounded-xl p-4 space-y-4">
-      {/* Profile name */}
+    <div className="border border-tomato/40 bg-tomato-soft p-4 space-y-4">
+      {/* Name */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Profile name</label>
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. ToBRFV Resistance"
-          className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <label className="font-mono text-[9px] tracking-[0.16em] uppercase text-ink-mute block mb-1">
+          Profile name
+        </label>
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="e.g. ToBRFV Resistance"
+          className="w-full border border-rule bg-paper px-3 py-1.5 text-sm text-ink outline-none focus:border-tomato"
+        />
       </div>
 
-      {/* Keyword tag input */}
+      {/* Keywords */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-medium text-gray-600">Keywords</label>
+          <label className="font-mono text-[9px] tracking-[0.16em] uppercase text-ink-mute">Keywords</label>
           <button
             onClick={handleSuggest}
             disabled={suggesting || termTags.length === 0}
-            className="text-xs text-purple-600 hover:text-purple-800 border border-purple-200 bg-white rounded-lg px-2.5 py-1 disabled:opacity-40 transition"
+            className="font-mono text-[9px] tracking-[0.1em] uppercase border border-rule bg-paper text-ink-mute hover:text-tomato hover:border-tomato px-2 py-1 disabled:opacity-40 transition"
           >
-            {suggesting ? '⟳ Suggesting…' : '✨ AI Suggest'}
+            {suggesting ? '⟳ Suggesting…' : '✦ AI Suggest'}
           </button>
         </div>
-
-        {/* Tag pills + text input in one box */}
         <div
-          className="flex flex-wrap gap-1.5 w-full border border-gray-300 bg-white rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-green-500 cursor-text"
+          className="flex flex-wrap gap-1.5 w-full border border-rule bg-paper px-3 py-2 focus-within:border-tomato cursor-text"
           onClick={() => document.getElementById('tag-input')?.focus()}
         >
-          {termTags.map(t => (
-            <span key={t} className="flex items-center gap-0.5 bg-green-100 text-green-800 text-xs rounded-full px-2.5 py-1 shrink-0">
-              {t}
-              <button
-                onClick={e => { e.stopPropagation(); setTermTags(prev => prev.filter(x => x !== t)) }}
-                className="text-green-600 hover:text-green-900 ml-0.5 leading-none"
-              >×</button>
+          {termTags.map((t, i) => (
+            <span key={t} className="flex items-center gap-0.5">
+              <span className="font-mono text-[10px] bg-paper-deep border border-rule px-2 py-0.5 text-ink-soft flex items-center gap-1">
+                {t}
+                <button
+                  onClick={e => { e.stopPropagation(); setTermTags(prev => prev.filter(x => x !== t)) }}
+                  className="text-tomato hover:text-tomato-deep leading-none ml-0.5"
+                >×</button>
+              </span>
+              {i < termTags.length - 1 && (
+                <span className="font-mono text-[10px] text-tomato">+</span>
+              )}
             </span>
           ))}
           <input
@@ -190,46 +210,41 @@ function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
             onKeyDown={handleTagKeyDown}
             onBlur={() => { if (tagInput.trim()) { addTag(tagInput); setTagInput('') } }}
             placeholder={termTags.length === 0 ? 'Type a term and press Enter…' : ''}
-            className="flex-1 min-w-[120px] outline-none text-sm bg-transparent py-0.5"
+            className="flex-1 min-w-[120px] outline-none text-sm bg-transparent py-0.5 text-ink"
           />
         </div>
-        <p className="text-xs text-gray-400 mt-1">Press Enter or comma to add · Backspace removes last tag</p>
+        <p className="font-mono text-[9px] text-ink-mute mt-1">Enter or comma to add · Backspace removes last</p>
 
-        {/* AI suggestion chips */}
         {aiSuggestions.length > 0 && (
-          <div className="mt-2">
-            <p className="text-xs text-gray-400 mb-1.5">Click to add:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {aiSuggestions.map(s => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    setTermTags(p => p.includes(s) ? p : [...p, s])
-                    setAiSuggestions(p => p.filter(x => x !== s))
-                  }}
-                  className="text-xs bg-purple-50 text-purple-700 border border-purple-200 rounded-full px-2.5 py-0.5 hover:bg-purple-100 transition"
-                >
-                  + {s}
-                </button>
-              ))}
-            </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {aiSuggestions.map(s => (
+              <button
+                key={s}
+                onClick={() => { setTermTags(p => p.includes(s) ? p : [...p, s]); setAiSuggestions(p => p.filter(x => x !== s)) }}
+                className="font-mono text-[9px] tracking-[0.1em] uppercase border border-tomato/40 bg-paper text-tomato px-2 py-0.5 hover:bg-tomato-soft transition"
+              >
+                + {s}
+              </button>
+            ))}
           </div>
         )}
-        {suggestError && <p className="text-xs text-red-500 mt-1">{suggestError}</p>}
+        {suggestError && <p className="font-mono text-[10px] text-tomato mt-1">{suggestError}</p>}
       </div>
 
-      {/* Language picker */}
+      {/* Languages */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1.5">Languages</label>
+        <label className="font-mono text-[9px] tracking-[0.16em] uppercase text-ink-mute block mb-2">
+          Search languages
+        </label>
         <div className="flex flex-wrap gap-1.5">
           {LANG_OPTIONS.map(l => (
             <button
               key={l.code}
               onClick={() => toggleLang(l.code)}
-              className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-full border transition ${
+              className={`flex items-center gap-1 px-2 py-1 font-mono text-[10px] border transition ${
                 langs.includes(l.code)
-                  ? 'bg-green-600 text-white border-green-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                  ? 'bg-tomato text-paper border-tomato'
+                  : 'bg-paper border-rule text-ink-soft hover:border-ink-mute'
               }`}
             >
               <span>{l.flag}</span>
@@ -237,15 +252,26 @@ function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
             </button>
           ))}
         </div>
+        <p className="font-display italic text-[11px] text-ink-mute mt-2">
+          {langs.length === 1 && langs[0] === 'en'
+            ? 'Searching in English only.'
+            : `Searching across ${langs.length} languages. Non-English results will include English abstracts.`
+          }
+        </p>
       </div>
 
       {/* Frequency */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Frequency</label>
-        <div className="flex gap-2">
+        <label className="font-mono text-[9px] tracking-[0.16em] uppercase text-ink-mute block mb-1">Frequency</label>
+        <div className="flex border border-rule overflow-hidden">
           {FREQ_OPTIONS.map(f => (
-            <button key={f} onClick={() => setFreq(f)}
-              className={`px-3 py-1 text-xs rounded-md border ${freq === f ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300'}`}>
+            <button
+              key={f}
+              onClick={() => setFreq(f)}
+              className={`font-mono text-[10px] tracking-[0.1em] uppercase px-3 py-1.5 transition ${
+                freq === f ? 'bg-ink text-paper' : 'bg-paper text-ink-soft hover:bg-paper-deep'
+              }`}
+            >
               {f}
             </button>
           ))}
@@ -254,24 +280,36 @@ function ProfileForm({ categoryId, categorySlug, profile, onSave, onCancel }) {
 
       {/* Intelligence brief */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Intelligence Brief
-          <span className="ml-1 font-normal text-gray-400">(optional — AI uses this to filter relevance)</span>
+        <label className="font-mono text-[9px] tracking-[0.16em] uppercase text-ink-mute block mb-1">
+          Intelligence brief
+          <span className="ml-1 normal-case font-body text-[10px] text-ink-mute">(optional)</span>
         </label>
         <textarea
-          value={brief} onChange={e => setBrief(e.target.value)} rows={5}
-          placeholder="Describe what is relevant to you. Example: We are a tomato seed breeder focused on ToBRFV and TYLCV resistance. We compete with Rijk Zwaan and Enza Zaden. Key markets: Netherlands, Spain, Mexico. We care about new variety launches, resistance breakthroughs, and regulatory approvals."
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 leading-relaxed resize-y"
+          value={brief}
+          onChange={e => setBrief(e.target.value)}
+          rows={4}
+          placeholder="Describe what is relevant to you. E.g. We are a tomato seed breeder focused on ToBRFV and TYLCV resistance. We compete with Rijk Zwaan and Enza Zaden. Key markets: Netherlands, Spain, Mexico."
+          className="w-full border border-rule bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-tomato leading-relaxed resize-y"
         />
-        <p className="text-xs text-gray-400 mt-1">Claude scores each matched article against this brief and surfaces the most relevant ones.</p>
+        <p className="font-mono text-[9px] text-ink-mute mt-1">
+          Claude scores each matched article against this brief.
+        </p>
       </div>
 
       <div className="flex gap-2 pt-1">
-        <button onClick={handleSave} disabled={saving || termTags.length === 0}
-          className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg disabled:opacity-50">
-          {saving ? 'Saving...' : 'Save Profile'}
+        <button
+          onClick={handleSave}
+          disabled={saving || termTags.length === 0}
+          className="font-mono text-[10px] tracking-[0.12em] uppercase bg-tomato text-paper px-4 py-2 hover:bg-tomato-deep disabled:opacity-50 transition"
+        >
+          {saving ? 'Saving…' : 'Save profile'}
         </button>
-        <button onClick={onCancel} className="px-4 py-1.5 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50">Cancel</button>
+        <button
+          onClick={onCancel}
+          className="font-mono text-[10px] tracking-[0.12em] uppercase border border-rule text-ink-mute px-4 py-2 hover:bg-paper-deep transition"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   )
@@ -287,9 +325,7 @@ export default function SearchProfiles({ category, selectedProfile, onProfileSel
   const loadProfiles = async (autoSelect = false) => {
     const { data } = await supabase.from('search_profiles').select('*').eq('category_id', category.id).order('created_at', { ascending: false })
     setProfiles(data || [])
-    if (autoSelect && data?.length > 0) {
-      onProfileSelect(data[0])
-    }
+    if (autoSelect && data?.length > 0) onProfileSelect(data[0])
   }
 
   const handleDelete = async (id) => {
@@ -306,13 +342,19 @@ export default function SearchProfiles({ category, selectedProfile, onProfileSel
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-700">Your Search Profiles</h2>
+        <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-mute">
+          Search profiles <span className="text-ink-soft">({profiles.length})</span>
+        </p>
         {!showForm && (
-          <button onClick={() => { setEditingProfile(null); setShowForm(true) }} className="text-xs text-green-600 hover:text-green-700 font-medium">
-            + Add Profile
+          <button
+            onClick={() => { setEditingProfile(null); setShowForm(true) }}
+            className="font-mono text-[9px] tracking-[0.12em] uppercase text-tomato hover:text-tomato-deep"
+          >
+            + Add profile
           </button>
         )}
       </div>
+
       {showForm && (
         <ProfileForm
           categoryId={category.id}
@@ -322,13 +364,21 @@ export default function SearchProfiles({ category, selectedProfile, onProfileSel
           onCancel={() => { setShowForm(false); setEditingProfile(null) }}
         />
       )}
+
       {profiles.length === 0 && !showForm && (
-        <p className="text-sm text-gray-400 italic">No profiles yet. Create one to start tracking.</p>
+        <p className="font-display italic text-sm text-ink-mute">No profiles yet. Create one to start tracking.</p>
       )}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
         {profiles.map(p => (
-          <ProfileCard key={p.id} profile={p} selected={selectedProfile} onSelect={onProfileSelect}
-            onEdit={prof => { setEditingProfile(prof); setShowForm(true) }} onDelete={handleDelete} />
+          <ProfileCard
+            key={p.id}
+            profile={p}
+            selected={selectedProfile}
+            onSelect={onProfileSelect}
+            onEdit={prof => { setEditingProfile(prof); setShowForm(true) }}
+            onDelete={handleDelete}
+          />
         ))}
       </div>
     </div>

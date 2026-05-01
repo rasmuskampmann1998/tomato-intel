@@ -1,19 +1,12 @@
 import { useState } from 'react'
 
 const PLATFORM_CONFIG = {
-  twitter:   { icon: '𝕏',  label: 'X',         color: 'text-gray-900',   bg: 'bg-gray-100' },
-  reddit:    { icon: '🟠', label: 'Reddit',     color: 'text-orange-700', bg: 'bg-orange-50' },
-  linkedin:  { icon: '💼', label: 'LinkedIn',   color: 'text-blue-700',   bg: 'bg-blue-50' },
-  instagram: { icon: '📸', label: 'Instagram',  color: 'text-pink-700',   bg: 'bg-pink-50' },
-  facebook:  { icon: '📘', label: 'Facebook',   color: 'text-blue-600',   bg: 'bg-blue-50' },
-  tiktok:    { icon: '🎵', label: 'TikTok',     color: 'text-gray-900',   bg: 'bg-gray-100' },
-}
-
-const TYPE_BADGE = {
-  competitor:  'bg-purple-100 text-purple-700',
-  media:       'bg-blue-100 text-blue-700',
-  researcher:  'bg-teal-100 text-teal-700',
-  influencer:  'bg-yellow-100 text-yellow-700',
+  twitter:   { icon: '𝕏',  label: 'X' },
+  reddit:    { icon: '🟠', label: 'Reddit' },
+  linkedin:  { icon: '💼', label: 'LinkedIn' },
+  instagram: { icon: '📸', label: 'Instagram' },
+  facebook:  { icon: '📘', label: 'Facebook' },
+  tiktok:    { icon: '🎵', label: 'TikTok' },
 }
 
 function timeAgo(iso) {
@@ -34,64 +27,74 @@ function fmt(n) {
 
 export default function SocialCard({ item, accountType }) {
   const [expanded, setExpanded] = useState(false)
-  const platform = PLATFORM_CONFIG[item.platform] || { icon: '💬', label: item.platform, color: 'text-gray-600', bg: 'bg-gray-50' }
+  const platform = PLATFORM_CONFIG[item.platform] || { icon: '💬', label: item.platform }
   const text = item.content || item.title || ''
   const isLong = text.length > 240
   const displayText = isLong && !expanded ? text.slice(0, 240) + '…' : text
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition p-4 space-y-3">
-      {/* Header row */}
+    <div className="bg-paper border border-rule hover:bg-paper-deep transition p-4 space-y-3">
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`shrink-0 text-base w-7 h-7 flex items-center justify-center rounded-full ${platform.bg}`}>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="shrink-0 text-base w-7 h-7 flex items-center justify-center border border-rule bg-paper-deep">
             {platform.icon}
           </span>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-sm font-medium text-gray-900 truncate">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-display text-[14px] text-ink truncate">
                 {item.author ? `@${item.author}` : platform.label}
               </span>
               {accountType && (
-                <span className={`text-xs rounded px-1.5 py-0.5 font-medium ${TYPE_BADGE[accountType] || 'bg-gray-100 text-gray-500'}`}>
+                <span className="font-mono text-[9px] tracking-[0.1em] uppercase border border-rule px-1.5 py-0.5 text-ink-mute bg-paper-deep">
                   {accountType}
                 </span>
               )}
             </div>
-            <span className="text-xs text-gray-400">{timeAgo(item.published_at)}</span>
+            <span className="font-mono text-[10px] text-ink-mute">{timeAgo(item.published_at)}</span>
           </div>
         </div>
         <a
           href={item.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 text-xs text-gray-400 hover:text-green-600 border border-gray-200 rounded px-2 py-1 whitespace-nowrap"
+          className="shrink-0 font-mono text-[9px] tracking-[0.12em] uppercase border border-rule px-2 py-1 text-ink-mute hover:text-tomato hover:border-tomato transition whitespace-nowrap"
         >
-          View →
+          View ↗
         </a>
       </div>
 
-      {/* Post text */}
-      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+      {/* Content */}
+      <p className="text-sm text-ink-soft leading-relaxed whitespace-pre-line">
         {displayText}
         {isLong && (
           <button
             onClick={() => setExpanded(e => !e)}
-            className="ml-1 text-xs text-green-600 hover:underline"
+            className="ml-1 font-mono text-[9px] tracking-[0.1em] uppercase text-tomato hover:text-tomato-deep"
           >
             {expanded ? 'less' : 'more'}
           </button>
         )}
       </p>
 
-      {/* Engagement bar */}
-      <div className="flex items-center gap-4 text-xs text-gray-400 border-t border-gray-100 pt-2">
-        {item.like_count > 0 && <span>❤ {fmt(item.like_count)}</span>}
-        {item.comment_count > 0 && <span>💬 {fmt(item.comment_count)}</span>}
-        {item.share_count > 0 && <span>🔁 {fmt(item.share_count)}</span>}
-        {item.view_count > 0 && <span>👁 {fmt(item.view_count)}</span>}
+      {/* Engagement */}
+      <div className="flex items-center gap-4 border-t border-rule pt-2">
+        {item.like_count > 0 && (
+          <span className="font-mono text-[10px] text-ink-mute">❤ {fmt(item.like_count)}</span>
+        )}
+        {item.comment_count > 0 && (
+          <span className="font-mono text-[10px] text-ink-mute">💬 {fmt(item.comment_count)}</span>
+        )}
+        {item.share_count > 0 && (
+          <span className="font-mono text-[10px] text-ink-mute">↺ {fmt(item.share_count)}</span>
+        )}
+        {item.view_count > 0 && (
+          <span className="font-mono text-[10px] text-ink-mute">👁 {fmt(item.view_count)}</span>
+        )}
         {item.language && item.language !== 'en' && (
-          <span className="ml-auto uppercase font-medium">{item.language}</span>
+          <span className="ml-auto font-mono text-[9px] tracking-[0.1em] uppercase border border-rule px-1.5 py-0.5 text-ink-mute">
+            {item.language.toUpperCase()} → EN
+          </span>
         )}
       </div>
     </div>

@@ -24,22 +24,23 @@ export default function TrendingBanner({ onTopicClick }) {
   if (!trends.length) return null
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shrink-0 overflow-x-auto">
-      <span className="text-xs font-semibold text-gray-500 shrink-0 flex items-center gap-1">
-        📈 Trending
+    <div className="bg-paper-deep border-b border-rule px-4 py-1.5 flex items-center gap-3 shrink-0 overflow-x-auto">
+      <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-mute shrink-0">
+        Trending
       </span>
-      <div className="flex items-center gap-1.5 overflow-x-auto">
+      <div className="flex items-center gap-1 overflow-x-auto">
         {trends.map(t => {
           const icon = CAT_ICON[t.category_slug] || '📌'
           return (
             <button
               key={t.id}
               onClick={() => onTopicClick?.(t.topic)}
-              className="shrink-0 flex items-center gap-1 bg-gray-100 hover:bg-green-100 hover:text-green-800 text-gray-700 rounded-full px-2.5 py-1 text-xs font-medium transition whitespace-nowrap"
+              className="shrink-0 flex items-center gap-1 border border-rule bg-paper hover:bg-tomato-soft hover:border-tomato hover:text-tomato text-ink-soft px-2 py-0.5 transition whitespace-nowrap"
               title={`${t.source_count} sources in last 48h`}
             >
-              {icon} {t.topic}
-              <span className="text-gray-400 font-normal ml-0.5">×{t.source_count}</span>
+              <span className="text-xs">{icon}</span>
+              <span className="font-mono text-[10px]">{t.topic}</span>
+              <span className="font-mono text-[9px] text-ink-mute ml-0.5">×{t.source_count}</span>
             </button>
           )
         })}

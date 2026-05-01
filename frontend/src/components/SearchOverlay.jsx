@@ -1,14 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
-const CATEGORY_COLORS = {
-  news: 'bg-blue-100 text-blue-700',
-  competitors: 'bg-purple-100 text-purple-700',
-  crop_recommendations: 'bg-green-100 text-green-700',
-  patents: 'bg-indigo-100 text-indigo-700',
-  regulations: 'bg-pink-100 text-pink-700',
-  genetics: 'bg-teal-100 text-teal-700',
-  social: 'bg-orange-100 text-orange-700',
+const CAT_LABELS = {
+  news: 'News', competitors: 'Competitors', crops: 'Crops',
+  patents: 'Patents', regulations: 'Regulations', genetics: 'Genetics', social: 'Social',
 }
 
 function highlight(text, query) {
@@ -17,8 +12,7 @@ function highlight(text, query) {
   if (idx === -1) return text.slice(0, 120)
   const start = Math.max(0, idx - 40)
   const end = Math.min(text.length, idx + query.length + 80)
-  const snippet = (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '')
-  return snippet
+  return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '')
 }
 
 export default function SearchOverlay({ onClose }) {
@@ -29,9 +23,7 @@ export default function SearchOverlay({ onClose }) {
   const inputRef = useRef(null)
   const debounceRef = useRef(null)
 
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+  useEffect(() => { inputRef.current?.focus() }, [])
 
   const search = useCallback(async (q) => {
     if (!q.trim() || q.trim().length < 2) { setResults([]); return }
@@ -39,10 +31,7 @@ export default function SearchOverlay({ onClose }) {
     const term = `%${q.trim()}%`
     const { data } = await supabase
       .from('interpreted_items')
-      .select(`
-        id, title_en, summary_en, category_slug, tags, relevance_score,
-        scraped_items (url, published_at, language, title)
-      `)
+      .select('id, title_en, summary_en, category_slug, tags, relevance_score, scraped_items (url, published_at, language, title)')
       .or(`title_en.ilike.${term},summary_en.ilike.${term}`)
       .order('relevance_score', { ascending: false })
       .limit(12)
@@ -68,17 +57,17 @@ export default function SearchOverlay({ onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4"
-      style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4"
+      style={{ background: 'rgba(26,22,20,0.6)', backdropFilter: 'blur(2px)' }}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-paper border border-rule overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100">
-          <span className="text-gray-400 text-lg">🔍</span>
+        {/* Input */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-rule">
+          <span className="text-ink-mute text-sm">🔍</span>
           <input
             ref={inputRef}
             type="text"
@@ -86,24 +75,28 @@ export default function SearchOverlay({ onClose }) {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKey}
             placeholder="Search articles, summaries, tags…"
-            className="flex-1 text-sm text-gray-900 placeholder-gray-400 outline-none"
+            className="flex-1 bg-transparent text-sm text-ink placeholder-ink-mute outline-none font-body"
           />
-          {loading && <span className="text-xs text-gray-400 animate-pulse">Searching…</span>}
-          <kbd className="text-xs bg-gray-100 text-gray-400 rounded px-1.5 py-0.5">Esc</kbd>
+          {loading && (
+            <span className="font-mono text-[9px] tracking-[0.14em] uppercase text-ink-mute animate-pulse">
+              Searching…
+            </span>
+          )}
+          <kbd className="font-mono text-[9px] border border-rule px-1.5 py-0.5 text-ink-mute">Esc</kbd>
         </div>
 
         {/* Results */}
         {results.length > 0 ? (
-          <ul className="max-h-96 overflow-y-auto divide-y divide-gray-50">
+          <ul className="max-h-96 overflow-y-auto divide-y divide-rule">
             {results.map((item, idx) => {
               const si = item.scraped_items
-              const catCls = CATEGORY_COLORS[item.category_slug] || 'bg-gray-100 text-gray-500'
               const score = item.relevance_score
-              const scoreColor = score >= 7 ? 'text-green-600' : score >= 4 ? 'text-yellow-600' : 'text-gray-400'
+              const scoreColor = score >= 7 ? 'text-leaf' : score >= 4 ? 'text-amber' : 'text-ink-mute'
               const snippet = highlight(item.summary_en || si?.title || '', query)
               const date = si?.published_at
                 ? new Date(si.published_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
                 : ''
+              const isActive = idx === activeIdx
 
               return (
                 <li key={item.id}>
@@ -111,46 +104,57 @@ export default function SearchOverlay({ onClose }) {
                     href={si?.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition cursor-pointer ${idx === activeIdx ? 'bg-gray-50' : ''}`}
+                    className={`flex items-start gap-3 px-4 py-3 transition cursor-pointer ${isActive ? 'bg-paper-deep' : 'hover:bg-paper-deep'}`}
                     onMouseEnter={() => setActiveIdx(idx)}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <span className={`text-xs rounded px-1.5 py-0.5 font-medium ${catCls}`}>
-                          {item.category_slug?.replace('_', ' ')}
+                        <span className="font-mono text-[9px] tracking-[0.12em] uppercase border border-rule px-1.5 py-0.5 text-ink-mute bg-paper-deep">
+                          {CAT_LABELS[item.category_slug] || item.category_slug}
                         </span>
-                        {date && <span className="text-xs text-gray-400">{date}</span>}
-                        {score > 0 && <span className={`text-xs font-medium ${scoreColor}`}>{score}/10</span>}
+                        {date && <span className="font-mono text-[10px] text-ink-mute">{date}</span>}
+                        {score > 0 && <span className={`font-mono text-[10px] ${scoreColor}`}>{score}/10</span>}
+                        {si?.language && si.language !== 'en' && (
+                          <span className="font-mono text-[9px] tracking-[0.1em] uppercase border border-rule px-1 text-ink-mute">
+                            {si.language.toUpperCase()} → EN
+                          </span>
+                        )}
                       </div>
-                      <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                      <p className="font-display text-[14px] text-ink line-clamp-1">
                         {item.title_en || si?.title}
                       </p>
                       {snippet && (
-                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{snippet}</p>
+                        <p className="text-xs text-ink-mute mt-0.5 line-clamp-2 leading-relaxed">{snippet}</p>
                       )}
                     </div>
-                    <span className="shrink-0 text-gray-300 text-xs mt-1">↗</span>
+                    <span className="shrink-0 font-mono text-[10px] text-ink-mute mt-1">↗</span>
                   </a>
                 </li>
               )
             })}
           </ul>
         ) : query.length >= 2 && !loading ? (
-          <div className="px-4 py-8 text-center text-sm text-gray-400">
-            No results for "{query}"
+          <div className="px-4 py-10 text-center">
+            <p className="font-display italic text-ink-mute">No results for "{query}"</p>
           </div>
         ) : query.length === 0 ? (
-          <div className="px-4 py-6 text-center text-xs text-gray-400">
-            Type to search across all interpreted articles
+          <div className="px-4 py-8 text-center">
+            <p className="font-mono text-[9px] tracking-[0.14em] uppercase text-ink-mute">
+              Type to search across all indexed articles
+            </p>
           </div>
         ) : null}
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-400">
-          <span><kbd className="bg-gray-100 rounded px-1">↑↓</kbd> navigate</span>
-          <span><kbd className="bg-gray-100 rounded px-1">↵</kbd> open</span>
-          <span><kbd className="bg-gray-100 rounded px-1">Esc</kbd> close</span>
-          {results.length > 0 && <span className="ml-auto">{results.length} results</span>}
+        <div className="px-4 py-2 border-t border-rule flex items-center gap-4">
+          {[['↑↓', 'navigate'], ['↵', 'open'], ['Esc', 'close']].map(([k, label]) => (
+            <span key={k} className="font-mono text-[9px] tracking-[0.1em] uppercase text-ink-mute flex items-center gap-1">
+              <kbd className="border border-rule px-1">{k}</kbd> {label}
+            </span>
+          ))}
+          {results.length > 0 && (
+            <span className="ml-auto font-mono text-[9px] text-ink-mute">{results.length} results</span>
+          )}
         </div>
       </div>
     </div>
