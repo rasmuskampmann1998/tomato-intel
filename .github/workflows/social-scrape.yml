@@ -1,0 +1,67 @@
+name: Social Media Scrape (Every 3 Days)
+
+on:
+  schedule:
+    - cron: '0 7 */3 * *'   # Every 3rd day at 07:00 UTC
+  workflow_dispatch:          # Manual trigger from GitHub UI
+    inputs:
+      mode:
+        description: 'Scrape mode'
+        required: false
+        default: 'both'
+        type: choice
+        options: [both, keywords, accounts]
+      platforms:
+        description: 'Platforms (comma-separated, blank = all)'
+        required: false
+        default: ''
+
+jobs:
+  social-scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: market-intelligence
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
+        working-directory: market-intelligence
+        run: playwright install chromium --with-deps
+
+      - name: Run social scraper (keywords + accounts)
+        working-directory: market-intelligence
+        run: |
+          MODE="${{ github.event.inputs.mode || 'both' }}"
+          PLATFORMS="${{ github.event.inputs.platforms }}"
+          ARGS="--mode $MODE"
+          if [ -n "$PLATFORMS" ]; then
+            ARGS="$ARGS --platforms $PLATFORMS"
+          fi
+          python scrapers/run_social_only.py $ARGS
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: TomatoIntelBot/1.0
+
+      - name: Run Claude interpreter on new social items
+        working-directory: market-intelligence
+        run: python processors/claude_interpreter.py --limit 150 --categories social
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}

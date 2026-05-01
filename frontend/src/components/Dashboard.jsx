@@ -6,6 +6,7 @@ import CategorySidebar from './CategorySidebar'
 import SearchProfiles from './SearchProfiles'
 import ResultsFeed from './ResultsFeed'
 import SourcePreferences from './SourcePreferences'
+import SocialFeed from './SocialFeed'
 
 const ICONS = {
   news: '📰',
@@ -149,40 +150,46 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {showSources && (
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <SourcePreferences
-                    category={selectedCategory}
-                    userId={user?.id}
-                    isAdmin={userRole === 'admin'}
-                    followedSourceIds={followedSourceIds}
-                    onPrefChange={handleSourcePrefChange}
-                  />
-                </div>
-              )}
-
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <SearchProfiles
-                  category={selectedCategory}
-                  selectedProfile={selectedProfile}
-                  onProfileSelect={setSelectedProfile}
-                />
-              </div>
-
-              {selectedProfile ? (
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <ResultsFeed
-                    profile={selectedProfile}
-                    category={selectedCategory}
-                    cardStyle={expConfig.cardStyle}
-                    followedSourceIds={followedSourceIds}
-                    userId={user?.id}
-                  />
-                </div>
+              {selectedCategory.slug === 'social' ? (
+                <SocialFeed />
               ) : (
-                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-400">
-                  Select a search profile above to view matching results
-                </div>
+                <>
+                  {showSources && (
+                    <div className="bg-white rounded-xl border border-gray-200 p-4">
+                      <SourcePreferences
+                        category={selectedCategory}
+                        userId={user?.id}
+                        isAdmin={userRole === 'admin'}
+                        followedSourceIds={followedSourceIds}
+                        onPrefChange={handleSourcePrefChange}
+                      />
+                    </div>
+                  )}
+
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <SearchProfiles
+                      category={selectedCategory}
+                      selectedProfile={selectedProfile}
+                      onProfileSelect={setSelectedProfile}
+                    />
+                  </div>
+
+                  {selectedProfile ? (
+                    <div className="bg-white rounded-xl border border-gray-200 p-4">
+                      <ResultsFeed
+                        profile={selectedProfile}
+                        category={selectedCategory}
+                        cardStyle={expConfig.cardStyle}
+                        followedSourceIds={followedSourceIds}
+                        userId={user?.id}
+                      />
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-400">
+                      Select a search profile above to view matching results
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
